@@ -1,0 +1,543 @@
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Typography,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TextField,
+  Modal,
+  IconButton,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  CircularProgress,
+} from "@mui/material";
+import axios from "axios";
+import CloseIcon from "@mui/icons-material/Close";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+
+const styleModal = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 450,
+  bgcolor: "#E9E4D4",
+  borderRadius: 2,
+  boxShadow: 24,
+  p: 4,
+  outline: "none",
+  color: "#333333",
+};
+
+export default function Products() {
+  const [products, setProducts] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const [openAdd, setOpenAdd] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [currentEdit, setCurrentEdit] = useState(null);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [currentDelete, setCurrentDelete] = useState(null);
+
+  const [form, setForm] = useState({
+    code: "",
+    name: "",
+    description: "",
+    unit: "",
+    unitPrice: "",
+    taxRate: "",
+    supplierId: "",
+  });
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const token = localStorage.getItem("token");
+
+  // Load danh sách sản phẩm
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get("http://localhost:8080/warehouse/products", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProducts(res.data.result);
+    } catch (error) {
+      console.error(error);
+    }
+    setLoading(false);
+  };
+
+  // Load danh sách nhà cung cấp
+  const fetchSuppliers = async () => {
+    try {
+      const res = await axios.get("http://localhost:8080/warehouse/suppliers", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setSuppliers(res.data.result);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+    fetchSuppliers();
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Validate form trước khi gửi
+  const validateForm = () => {
+    if (!form.code.trim()) {
+      setErrorMessage("Mã sản phẩm không được để trống.");
+      return false;
+    }
+    if (!form.name.trim()) {
+      setErrorMessage("Tên sản phẩm không được để trống.");
+      return false;
+    }
+    if (!form.unit.trim()) {
+      setErrorMessage("Đơn vị không được để trống.");
+      return false;
+    }
+    if (!form.unitPrice || isNaN(parseFloat(form.unitPrice))) {
+      setErrorMessage("Giá sản phẩm phải là số hợp lệ.");
+      return false;
+    }
+    if (!form.supplierId) {
+      setErrorMessage("Vui lòng chọn nhà cung cấp.");
+      return false;
+    }
+    setErrorMessage("");
+    return true;
+  };
+
+  // Thêm sản phẩm
+  const handleAddProduct = async () => {
+    if (!validateForm()) return;
+
+    try {
+      const payload = {
+        code: form.code.trim(),
+        name: form.name.trim(),
+        description: form.description.trim(),
+        unit: form.unit.trim(),
+        unitPrice: parseFloat(form.unitPrice),
+        taxRate: form.taxRate ? parseFloat(form.taxRate) : null,
+        supplierId: parseInt(form.supplierId),
+      };
+      await axios.post("http://localhost:8080/warehouse/products", payload, {
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      });
+      fetchProducts();
+      setOpenAdd(false);
+      setForm({
+        code: "",
+        name: "",
+        description: "",
+        unit: "",
+        unitPrice: "",
+        taxRate: "",
+        supplierId: "",
+      });
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        setErrorMessage(error.response.data.message);
+      } else {
+        setErrorMessage("Lỗi không xác định. Vui lòng thử lại.");
+      }
+    }
+  };
+
+  // Mở modal sửa
+  const handleOpenEdit = (product) => {
+    setCurrentEdit(product);
+    setForm({
+      code: product.code || "",
+      name: product.name || "",
+      description: product.description || "",
+      unit: product.unit || "",
+      unitPrice: product.unitPrice ? product.unitPrice.toString() : "",
+      taxRate: product.taxRate ? product.taxRate.toString() : "",
+      supplierId: product.supplierId ? product.supplierId.toString() : "",
+    });
+    setErrorMessage("");
+    setOpenEdit(true);
+  };
+
+  const handleCloseEdit = () => {
+    setOpenEdit(false);
+    setCurrentEdit(null);
+    setErrorMessage("");
+  };
+
+  // Sửa sản phẩm
+  const handleEditProduct = async () => {
+    if (!validateForm()) return;
+
+    try {
+      const payload = {
+        code: form.code.trim(),
+        name: form.name.trim(),
+        description: form.description.trim(),
+        unit: form.unit.trim(),
+        unitPrice: parseFloat(form.unitPrice),
+        taxRate: form.taxRate ? parseFloat(form.taxRate) : null,
+        supplierId: parseInt(form.supplierId),
+      };
+      await axios.put(`http://localhost:8080/warehouse/products/${currentEdit.id}`, payload, {
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      });
+      fetchProducts();
+      handleCloseEdit();
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        setErrorMessage(error.response.data.message);
+      } else {
+        setErrorMessage("Lỗi không xác định. Vui lòng thử lại.");
+      }
+    }
+  };
+
+  // Xóa sản phẩm
+  const handleOpenDelete = (product) => {
+    setCurrentDelete(product);
+    setOpenDelete(true);
+  };
+
+  const handleCloseDelete = () => {
+    setCurrentDelete(null);
+    setOpenDelete(false);
+  };
+
+  const handleDeleteProduct = async () => {
+    try {
+      await axios.delete(`http://localhost:8080/warehouse/products/${currentDelete.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchProducts();
+      handleCloseDelete();
+    } catch (error) {
+      console.error("Xóa sản phẩm lỗi:", error);
+    }
+  };
+
+  return (
+    <Box sx={{ p: 3, bgcolor: "#F5F1E9", minHeight: "100vh", color: "#333333" }}>
+      <Typography variant="h5" sx={{ mb: 2, color: "#6D5F4B" }}>
+        Quản lý sản phẩm
+      </Typography>
+
+      <Button
+        variant="contained"
+        onClick={() => {
+          setForm({
+            code: "",
+            name: "",
+            description: "",
+            unit: "",
+            unitPrice: "",
+            taxRate: "",
+            supplierId: "",
+          });
+          setErrorMessage("");
+          setOpenAdd(true);
+        }}
+        sx={{ mb: 2, bgcolor: "#6D5F4B", color: "#E0D7C6", "&:hover": { bgcolor: "#4A473D" }, textTransform: "none" }}
+      >
+        Thêm sản phẩm
+      </Button>
+
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <CircularProgress sx={{ color: "#6D5F4B" }} />
+        </Box>
+      ) : (
+        <TableContainer component={Paper} sx={{ boxShadow: "none", bgcolor: "#FFFFFF" }}>
+          <Table sx={{ minWidth: 650 }}>
+            <TableHead>
+              <TableRow sx={{ bgcolor: "#E9E4D4" }}>
+                <TableCell sx={{ fontWeight: "bold" }}>Mã SP</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Tên SP</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Mô tả</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Đơn vị</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Giá</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Thuế (%)</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Nhà cung cấp</TableCell>
+                <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>Thao tác</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {products.map((p) => (
+                <TableRow key={p.id}>
+                  <TableCell>{p.code}</TableCell>
+                  <TableCell>{p.name}</TableCell>
+                  <TableCell>{p.description}</TableCell>
+                  <TableCell>{p.unit}</TableCell>
+                  <TableCell>{p.unitPrice?.toLocaleString("vi-VN")} VND</TableCell>
+                  <TableCell>{p.taxRate !== null ? p.taxRate + "%" : ""}</TableCell>
+                  <TableCell>{p.supplierName}</TableCell>
+                  <TableCell align="center">
+                    <IconButton color="primary" onClick={() => handleOpenEdit(p)}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton color="error" onClick={() => handleOpenDelete(p)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {products.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} align="center">
+                    Không có sản phẩm nào
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
+      {/* Modal Thêm sản phẩm */}
+      <Modal open={openAdd} onClose={() => setOpenAdd(false)}>
+        <Box sx={styleModal}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+            <Typography variant="h6" color="#6D5F4B">
+              Thêm sản phẩm mới
+            </Typography>
+            <IconButton onClick={() => setOpenAdd(false)} size="small" sx={{ color: "#6D5F4B" }}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+
+          {errorMessage && (
+            <Typography color="error" sx={{ mb: 2, fontWeight: "bold" }}>
+              {errorMessage}
+            </Typography>
+          )}
+
+          <TextField
+            label="Mã sản phẩm"
+            name="code"
+            value={form.code}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            sx={{ mb: 1 }}
+          />
+          <TextField
+            label="Tên sản phẩm"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            sx={{ mb: 1 }}
+          />
+          <TextField
+            label="Mô tả"
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            multiline
+            rows={2}
+            sx={{ mb: 1 }}
+          />
+          <TextField
+            label="Đơn vị"
+            name="unit"
+            value={form.unit}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            sx={{ mb: 1 }}
+          />
+          <TextField
+            label="Giá sản phẩm (VND)"
+            name="unitPrice"
+            type="number"
+            value={form.unitPrice}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            sx={{ mb: 1 }}
+          />
+          <TextField
+            label="Thuế mặc định (%)"
+            name="taxRate"
+            type="number"
+            value={form.taxRate}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            sx={{ mb: 1 }}
+          />
+          <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+            <InputLabel id="supplier-label">Nhà cung cấp</InputLabel>
+            <Select
+              labelId="supplier-label"
+              name="supplierId"
+              value={form.supplierId}
+              label="Nhà cung cấp"
+              onChange={handleChange}
+            >
+              {suppliers.map((sup) => (
+                <MenuItem key={sup.id} value={sup.id.toString()}>
+                  {sup.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={handleAddProduct}
+            sx={{ bgcolor: "#6D5F4B", "&:hover": { bgcolor: "#4A473D" }, textTransform: "none" }}
+          >
+            Thêm sản phẩm
+          </Button>
+        </Box>
+      </Modal>
+
+      {/* Modal Sửa sản phẩm */}
+      <Modal open={openEdit} onClose={handleCloseEdit}>
+        <Box sx={styleModal}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+            <Typography variant="h6" color="#6D5F4B">
+              Sửa sản phẩm
+            </Typography>
+            <IconButton onClick={handleCloseEdit} size="small" sx={{ color: "#6D5F4B" }}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+
+          {errorMessage && (
+            <Typography color="error" sx={{ mb: 2, fontWeight: "bold" }}>
+              {errorMessage}
+            </Typography>
+          )}
+
+          <TextField
+            label="Mã sản phẩm"
+            name="code"
+            value={form.code}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            sx={{ mb: 1 }}
+          />
+          <TextField
+            label="Tên sản phẩm"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            sx={{ mb: 1 }}
+          />
+          <TextField
+            label="Mô tả"
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            multiline
+            rows={2}
+            sx={{ mb: 1 }}
+          />
+          <TextField
+            label="Đơn vị"
+            name="unit"
+            value={form.unit}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            sx={{ mb: 1 }}
+          />
+          <TextField
+            label="Giá sản phẩm (VND)"
+            name="unitPrice"
+            type="number"
+            value={form.unitPrice}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            sx={{ mb: 1 }}
+          />
+          <TextField
+            label="Thuế mặc định (%)"
+            name="taxRate"
+            type="number"
+            value={form.taxRate}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            sx={{ mb: 1 }}
+          />
+          <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+            <InputLabel id="supplier-edit-label">Nhà cung cấp</InputLabel>
+            <Select
+              labelId="supplier-edit-label"
+              name="supplierId"
+              value={form.supplierId}
+              label="Nhà cung cấp"
+              onChange={handleChange}
+            >
+              {suppliers.map((sup) => (
+                <MenuItem key={sup.id} value={sup.id.toString()}>
+                  {sup.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={handleEditProduct}
+            sx={{ bgcolor: "#6D5F4B", "&:hover": { bgcolor: "#4A473D" }, textTransform: "none" }}
+          >
+            Lưu thay đổi
+          </Button>
+        </Box>
+      </Modal>
+
+      {/* Modal Xóa sản phẩm */}
+      <Modal open={openDelete} onClose={handleCloseDelete}>
+        <Box sx={{ ...styleModal, width: 350, textAlign: "center" }}>
+          <Typography variant="h6" sx={{ mb: 3, color: "#6D5F4B" }}>
+            Xác nhận xóa sản phẩm
+          </Typography>
+          <Typography sx={{ mb: 3 }}>
+            Bạn có chắc muốn xóa sản phẩm <strong>{currentDelete?.name}</strong> không?
+          </Typography>
+          <Box sx={{ display: "flex", justifyContent: "space-around" }}>
+            <Button variant="contained" color="error" onClick={handleDeleteProduct}>
+              Xóa
+            </Button>
+            <Button variant="outlined" onClick={handleCloseDelete}>
+              Hủy
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+    </Box>
+  );
+}
