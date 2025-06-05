@@ -8,6 +8,7 @@ import Customers from './pages/Customers';
 import Products from "./pages/Products";
 import PurchaseOrders from "./pages/PurchaseOrders";
 import PurchaseOrderDetail from './pages/PurchaseOrderDetail';
+import SaleOrders from "./pages/SaleOrders";
 
 function RequireAuth({ children }) {
   const token = localStorage.getItem("token");
@@ -58,6 +59,8 @@ export default function App() {
         <Route path="products" element={<Products />} />
         <Route path="purchase-orders" element={<PurchaseOrders />} />
         <Route path="purchase-orders/:orderId" element={<PurchaseOrderDetail />} />
+        <Route path="sale-orders" element={<SaleOrders />} />
+
 
       </Route>
 

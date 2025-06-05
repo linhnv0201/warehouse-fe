@@ -25,13 +25,9 @@ import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
-
-
-export default function PurchaseOrders() {
+export default function SaleOrders() {
   const navigate = useNavigate();
   const [view, setView] = useState("list"); // 'list' | 'create'
-
-  
 
   // COMMON
   const token = localStorage.getItem("token");
@@ -39,29 +35,29 @@ export default function PurchaseOrders() {
   // --- STATE CHUNG CHO LIST ---
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
-  const [loadingOrderIds, setLoadingOrderIds] = useState([]);
   const [filterApproved, setFilterApproved] = useState(false);
 
   // --- STATE CHUNG CHO CREATE ---
-  const [warehouses, setWarehouses] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
+  const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
+  const [warehouses, setWarehouses] = useState([]); // Dữ liệu kho hàng
 
-  const [selectedWarehouse, setSelectedWarehouse] = useState("");
-  const [selectedSupplier, setSelectedSupplier] = useState("");
+
+  const [selectedCustomer, setSelectedCustomer] = useState("");
+  const [selectedWarehouse, setSelectedWarehouse] = useState(""); 
   const [orderName, setOrderName] = useState("");
   const [items, setItems] = useState([{ productId: "", quantity: 1 }]);
 
   const [loadingCreate, setLoadingCreate] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
 
-  // Fetch đơn hàng (list)
+  // Fetch đơn hàng bán (list)
   const fetchOrders = async () => {
     setLoadingOrders(true);
     try {
       const url = filterApproved
-        ? "http://localhost:8080/warehouse/purchase-orders/approved"
-        : "http://localhost:8080/warehouse/purchase-orders";
+        ? "http://localhost:8080/warehouse/sales-orders/approved"
+        : "http://localhost:8080/warehouse/sales-orders";
 
       const res = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
@@ -77,35 +73,28 @@ export default function PurchaseOrders() {
     if (view === "list") fetchOrders();
   }, [filterApproved, view]);
 
-  // Lấy kho & nhà cung cấp (create)
+  // Lấy khách hàng (create)
   useEffect(() => {
     if (view !== "create") return;
-    // fetch warehouses
+    // fetch customers
     axios
-      .get("http://localhost:8080/warehouse/warehouses", {
+      .get("http://localhost:8080/warehouse/customers", {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => setWarehouses(res.data.result || []))
-      .catch((err) => console.error("Lỗi tải warehouses:", err));
-    // fetch suppliers
-    axios
-      .get("http://localhost:8080/warehouse/suppliers", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setSuppliers(res.data.result || []))
-      .catch((err) => console.error("Lỗi tải suppliers:", err));
+      .then((res) => setCustomers(res.data.result || []))
+      .catch((err) => console.error("Lỗi tải customers:", err));
   }, [view, token]);
 
-  // Khi chọn supplier thì load products theo supplierId (create)
+  // Lấy sản phẩm khi chọn khách hàng (create)
   useEffect(() => {
-    if (!selectedSupplier) {
+    if (!selectedCustomer) {
       setProducts([]);
       setItems([{ productId: "", quantity: 1 }]);
       return;
     }
     setLoadingProducts(true);
     axios
-      .get(`http://localhost:8080/warehouse/products/supplier/${selectedSupplier}`, {
+      .get(`http://localhost:8080/warehouse/products/customer/${selectedCustomer}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -114,11 +103,11 @@ export default function PurchaseOrders() {
       })
       .catch((err) => console.error("Lỗi tải products:", err))
       .finally(() => setLoadingProducts(false));
-  }, [selectedSupplier, token]);
+  }, [selectedCustomer, token]);
 
-  // Xử lý tạo đơn hàng (create)
+  // Xử lý tạo đơn hàng bán (create)
   const handleSubmit = async () => {
-    if (!orderName || !selectedSupplier || !selectedWarehouse) {
+    if (!orderName || !selectedCustomer) {
       alert("Vui lòng điền đầy đủ thông tin");
       return;
     }
@@ -128,8 +117,7 @@ export default function PurchaseOrders() {
     }
 
     const payload = {
-      supplierId: Number(selectedSupplier),
-      warehouseId: Number(selectedWarehouse),
+      customerId: Number(selectedCustomer),
       orderName,
       items: items.map(({ productId, quantity }) => ({
         productId: Number(productId),
@@ -139,21 +127,20 @@ export default function PurchaseOrders() {
 
     setLoadingCreate(true);
     try {
-      await axios.post("http://localhost:8080/warehouse/purchase-orders", payload, {
+      await axios.post("htt/sale-orders", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      alert("Tạo đơn hàng thành công!");
+      alert("Tạo đơn hàng bán thành công!");
       // Quay về list
       setView("list");
       // Reset form
       setOrderName("");
-      setSelectedSupplier("");
-      setSelectedWarehouse("");
+      setSelectedCustomer("");
       setItems([{ productId: "", quantity: 1 }]);
       fetchOrders();
     } catch (error) {
-      console.error("Lỗi tạo đơn hàng:", error);
-      alert("Tạo đơn hàng thất bại");
+      console.error("Lỗi tạo đơn hàng bán:", error);
+      alert("Tạo đơn hàng bán thất bại");
     } finally {
       setLoadingCreate(false);
     }
@@ -171,30 +158,13 @@ export default function PurchaseOrders() {
     );
   };
 
-  // Cập nhật trạng thái đơn hàng (list)
-  const handleChangeOrderStatus = async (orderId, status) => {
-    setLoadingOrderIds((prev) => [...prev, orderId]);
-    try {
-      await axios.patch(
-        `http://localhost:8080/warehouse/purchase-orders/${orderId}/status?status=${status}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      fetchOrders();
-    } catch (error) {
-      console.error("Lỗi cập nhật trạng thái:", error?.response?.data || error.message);
-    } finally {
-      setLoadingOrderIds((prev) => prev.filter((id) => id !== orderId));
-    }
-  };
-
   // === RENDER ===
   if (view === "create") {
-    // Màn tạo đơn hàng mới
+    // Màn tạo đơn hàng bán mới
     return (
       <Box sx={{ p: 3, bgcolor: "#F5F1E9", minHeight: "100vh", maxWidth: 700, mx: "auto" }}>
         <Typography variant="h5" sx={{ mb: 3, color: "#6D5F4B" }}>
-          Tạo đơn hàng mua mới
+          Tạo đơn hàng bán mới
         </Typography>
 
         <FormControl fullWidth sx={{ mb: 2 }}>
@@ -207,25 +177,26 @@ export default function PurchaseOrders() {
         </FormControl>
 
         <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel id="supplier-label">Nhà cung cấp</InputLabel>
+          <InputLabel id="customer-label">Khách hàng</InputLabel>
           <Select
-            labelId="supplier-label"
-            value={selectedSupplier}
-            label="Nhà cung cấp"
-            onChange={(e) => setSelectedSupplier(e.target.value)}
+            labelId="customer-label"
+            value={selectedCustomer}
+            label="Khách hàng"
+            onChange={(e) => setSelectedCustomer(e.target.value)}
             disabled={loadingCreate}
           >
             <MenuItem value="">
-              <em>Chọn nhà cung cấp</em>
+              <em>Chọn khách hàng</em>
             </MenuItem>
-            {suppliers.map((sup) => (
-              <MenuItem key={sup.id} value={sup.id}>
-                {sup.name}
+            {customers.map((customer) => (
+              <MenuItem key={customer.id} value={customer.id}>
+                {customer.name}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
 
+        
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel id="warehouse-label">Kho hàng</InputLabel>
           <Select
@@ -257,23 +228,23 @@ export default function PurchaseOrders() {
         ) : (
           items.map((item, index) => (
             <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }} key={index}>
-            <FormControl sx={{ flex: 1 }}>
-              <InputLabel id={`product-label-${index}`}>Sản phẩm</InputLabel>
-              <Select
-                labelId={`product-label-${index}`}
-                value={item.productId}
-                label="Sản phẩm"
-                onChange={(e) => handleItemChange(index, "productId", e.target.value)}
-                disabled={loadingCreate}
-              >
-                <MenuItem value=""><em>Chọn sản phẩm</em></MenuItem>
-                {products.map((p) => (
-                  <MenuItem key={p.id} value={p.id}>
-                    {p.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>     
+              <FormControl sx={{ flex: 1 }}>
+                <InputLabel id={`product-label-${index}`}>Sản phẩm</InputLabel>
+                <Select
+                  labelId={`product-label-${index}`}
+                  value={item.productId}
+                  label="Sản phẩm"
+                  onChange={(e) => handleItemChange(index, "productId", e.target.value)}
+                  disabled={loadingCreate}
+                >
+                  <MenuItem value=""><em>Chọn sản phẩm</em></MenuItem>
+                  {products.map((p) => (
+                    <MenuItem key={p.id} value={p.id}>
+                      {p.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
               <TextField
                 label="Số lượng"
@@ -302,39 +273,33 @@ export default function PurchaseOrders() {
         <Button
           startIcon={<AddCircleOutlineIcon />}
           onClick={handleAddItem}
-          disabled={loadingCreate || loadingProducts || !selectedSupplier}
+          disabled={loadingCreate || loadingProducts || !selectedCustomer}
           sx={{ mb: 3 }}
         >
           Thêm sản phẩm
         </Button>
 
-        <Box>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
           <Button
             variant="contained"
             onClick={handleSubmit}
-            disabled={loadingCreate}
-            sx={{ mr: 2, bgcolor: "#6D5F4B" }}
+            sx={{ width: "100%", bgcolor: "#6D5F4B" }}
+            disabled={loadingCreate || loadingProducts}
           >
-            {loadingCreate ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Tạo đơn hàng"}
-          </Button>
-
-          <Button variant="outlined" onClick={() => setView("list")} disabled={loadingCreate}>
-            Hủy
+            {loadingCreate ? <CircularProgress size={24} sx={{ color: "#fff" }} /> : "Tạo đơn hàng"}
           </Button>
         </Box>
       </Box>
     );
   }
 
-  // === Màn danh sách đơn hàng (list) ===
+  // Màn hình danh sách đơn hàng
   return (
     <Box sx={{ p: 3, bgcolor: "#F5F1E9", minHeight: "100vh" }}>
       <Typography variant="h5" sx={{ mb: 3, color: "#6D5F4B" }}>
-        Danh sách đơn hàng
+        Danh sách đơn hàng bán
       </Typography>
-
-
-      <Box sx={{ mb: 2 }}>
+ <Box sx={{ mb: 2 }}>
         <Button
           variant="contained"
           onClick={() => setView("create")}
@@ -373,49 +338,37 @@ export default function PurchaseOrders() {
 
 </FormControl>
       </Box>
-
       {loadingOrders ? (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 10 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
           <CircularProgress sx={{ color: "#6D5F4B" }} />
         </Box>
       ) : (
         <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} aria-label="Danh sách đơn hàng">
-            <TableHead sx={{ bgcolor: "#6D5F4B" }}>
+          <Table>
+            <TableHead>
               <TableRow>
-                <TableCell sx={{ color: "white" }}>Mã đơn</TableCell>
-                <TableCell sx={{ color: "white" }}>Tên đơn</TableCell>
-                <TableCell sx={{ color: "white" }}>Nhà cung cấp</TableCell>
-                <TableCell sx={{ color: "white" }}>Kho hàng</TableCell>
-                <TableCell sx={{ color: "white" }}>Trạng thái</TableCell>
-                <TableCell sx={{ color: "white" }}>Ngày tạo</TableCell>
-                <TableCell sx={{ color: "white" }}>Hành động</TableCell>
+                <TableCell>Mã đơn hàng</TableCell>
+                <TableCell>Tên đơn hàng</TableCell>
+                <TableCell>Khách hàng</TableCell>
+                <TableCell>Trạng thái</TableCell>
+                <TableCell>Hành động</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {orders.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} align="center">
-                    Không có đơn hàng nào
-                  </TableCell>
-                </TableRow>
-              )}
               {orders.map((order) => (
                 <TableRow key={order.id}>
-                  <TableCell>{order.code || order.id}</TableCell>
+                  <TableCell>{order.id}</TableCell>
                   <TableCell>{order.orderName}</TableCell>
-                  <TableCell>{order.supplierName}</TableCell>
-                  <TableCell>{order.warehouseName}</TableCell>
+                  <TableCell>{order.customerName}</TableCell>
                   <TableCell>{order.status}</TableCell>
                   <TableCell>
-                    {new Date(order.createdAt).toLocaleDateString("vi-VN")}
-                  </TableCell>
-                  <TableCell>
-                    {
-
-                    <Link to={`/dashboard/purchase-orders/${order.id}`}>Xem chi tiết</Link>
-              
-                    }
+                    <Button
+                      component={Link}
+                      to={`/sale-orders/${order.id}`}
+                      variant="outlined"
+                    >
+                      Xem
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
