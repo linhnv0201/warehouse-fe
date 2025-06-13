@@ -145,10 +145,10 @@ export default function Customers() {
           <Table>
             <TableHead>
               <TableRow sx={{ bgcolor: "#E9E4D4" }}>
-                <TableCell>Tên</TableCell>
-                <TableCell>Số điện thoại</TableCell>
-                <TableCell>Địa chỉ</TableCell>
-                <TableCell align="center">Thao tác</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Tên</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>SDT</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Địa chỉ</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }} align="center">Thao tác</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

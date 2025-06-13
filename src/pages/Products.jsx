@@ -269,14 +269,14 @@ export default function Products() {
           <Table sx={{ minWidth: 650 }}>
             <TableHead>
               <TableRow sx={{ bgcolor: "#E9E4D4" }}>
-                <TableCell sx={{ fontWeight: "bold" }}>Mã SP</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Tên SP</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Mô tả</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Đơn vị</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Giá</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Thuế (%)</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Nhà cung cấp</TableCell>
-                <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>Thao tác</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Mã SP</TableCell>
+                <TableCell sx={{ color: "#6D5F4B",fontWeight: "bold" }}>Tên SP</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Mô tả</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Đơn vị</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Giá</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Thuế (%)</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Nhà cung cấp</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold", textAlign: "center" }}>Thao tác</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -290,10 +290,10 @@ export default function Products() {
                   <TableCell>{p.taxRate !== null ? p.taxRate + "%" : ""}</TableCell>
                   <TableCell>{p.supplierName}</TableCell>
                   <TableCell align="center">
-                    <IconButton color="primary" onClick={() => handleOpenEdit(p)}>
+                    <IconButton color="5D4037" onClick={() => handleOpenEdit(p)}>
                       <EditIcon />
                     </IconButton>
-                    <IconButton color="error" onClick={() => handleOpenDelete(p)}>
+                    <IconButton color="5D4037" onClick={() => handleOpenDelete(p)}>
                       <DeleteIcon />
                     </IconButton>
                   </TableCell>

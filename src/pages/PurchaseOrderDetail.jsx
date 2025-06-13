@@ -693,6 +693,7 @@ const handleCreatePayment = () => {
  {/* Thông tin hóa đơn */}
  <Dialog
   open={openInvoiceDialog}
+  set
   onClose={handleCloseInvoice}
   fullWidth
   maxWidth="md"

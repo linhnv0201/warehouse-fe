@@ -210,13 +210,13 @@ export default function Employees() {
         <Table sx={{ minWidth: 650 }} aria-label="employee table">
           <TableHead>
             <TableRow sx={{ bgcolor: "#E9E4D4" }}>
-              <TableCell sx={{ color: "#333333", fontWeight: "bold" }}>Email</TableCell>
-              <TableCell sx={{ color: "#333333", fontWeight: "bold" }}>Fullname</TableCell>
-              <TableCell sx={{ color: "#333333", fontWeight: "bold" }}>Phone</TableCell>
-              <TableCell sx={{ color: "#333333", fontWeight: "bold" }}>Address</TableCell>
-              <TableCell sx={{ color: "#333333", fontWeight: "bold" }}>Role</TableCell>
-              <TableCell sx={{ color: "#333333", fontWeight: "bold", textAlign: "center" }}>
-                Actions
+              <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Email</TableCell>
+              <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Tên</TableCell>
+              <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>SDT</TableCell>
+              <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Địa chỉ</TableCell>
+              <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Vai trò</TableCell>
+              <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold", textAlign: "center" }}>
+                Thao tác
               </TableCell>
             </TableRow>
           </TableHead>

@@ -31,7 +31,7 @@ const menuItems = [
   { label: "Quản lý kho hàng", path: "warehouses" },
   { label: "Quản lý nhà cung cấp", path: "suppliers" },
   { label: "Quản lý khách hàng", path: "customers" },
-  { label: "Quản lý sản phẩm thi trường", path: "products" },
+  { label: "Quản lý sản phẩm thị trường", path: "products" },
 ];
 
 export default function Dashboard() {
@@ -145,6 +145,7 @@ export default function Dashboard() {
               Dashboard
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              {/* Thông báo */}
               <Badge badgeContent={0} color="error">
                 <NotificationsIcon />
               </Badge>

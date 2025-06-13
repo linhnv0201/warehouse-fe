@@ -40,7 +40,7 @@ export default function PurchaseOrders() {
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [loadingOrderIds, setLoadingOrderIds] = useState([]);
-  const [filterApproved, setFilterApproved] = useState(false);
+  const [filterStatus, setFilterStatus] = useState("ALL");
 
   // --- STATE CHUNG CHO CREATE ---
   const [warehouses, setWarehouses] = useState([]);
@@ -57,25 +57,24 @@ export default function PurchaseOrders() {
 
   // Fetch đơn hàng (list)
   const fetchOrders = async () => {
-    setLoadingOrders(true);
-    try {
-      const url = filterApproved
-        ? "http://localhost:8080/warehouse/purchase-orders/approved"
-        : "http://localhost:8080/warehouse/purchase-orders";
+  setLoadingOrders(true);
+  try {
+    const res = await axios.get(
+      `http://localhost:8080/warehouse/purchase-orders?status=${filterStatus}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setOrders(res.data.result || []);
+  } catch (error) {
+    console.error("Lỗi tải đơn hàng:", error);
+  }
+  setLoadingOrders(false);
+};
 
-      const res = await axios.get(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setOrders(res.data.result || []);
-    } catch (error) {
-      console.error("Lỗi tải đơn hàng:", error);
-    }
-    setLoadingOrders(false);
-  };
+// Trong useEffect khi lọc thay đổi
+useEffect(() => {
+  if (view === "list") fetchOrders();
+}, [filterStatus, view]);
 
-  useEffect(() => {
-    if (view === "list") fetchOrders();
-  }, [filterApproved, view]);
 
   // Lấy kho & nhà cung cấp (create)
   useEffect(() => {
@@ -360,16 +359,20 @@ export default function PurchaseOrders() {
     },
   }}
 >
-  <InputLabel id="filter-label">Lọc đơn hàng</InputLabel>
-  <Select
-    labelId="filter-label"
-    value={filterApproved ? "approved" : "all"}
-    label="Lọc đơn hàng"
-    onChange={(e) => setFilterApproved(e.target.value === "approved")}
-  >
-    <MenuItem value="all">Tất cả đơn hàng</MenuItem>
-    <MenuItem value="approved">Đơn đã duyệt</MenuItem>
-  </Select>
+<InputLabel id="filter-status-label">Lọc theo trạng thái</InputLabel>
+    <Select
+      labelId="filter-status-label"
+      value={filterStatus}
+      label="Lọc theo trạng thái"
+      onChange={(e) => setFilterStatus(e.target.value)}
+    >
+      <MenuItem value="ALL">Tất cả đơn</MenuItem>
+      <MenuItem value="PENDING">Đang chờ</MenuItem>
+      <MenuItem value="APPROVED">Đã duyệt</MenuItem>
+      <MenuItem value="CANCELLED">Đã hủy</MenuItem>
+      <MenuItem value="COMPLETED">Hoàn thành</MenuItem>
+    </Select>
+
 
 </FormControl>
       </Box>
@@ -381,15 +384,15 @@ export default function PurchaseOrders() {
       ) : (
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 650 }} aria-label="Danh sách đơn hàng">
-            <TableHead sx={{ bgcolor: "#6D5F4B" }}>
+            <TableHead sx={{ bgcolor: "#E9E4D4" }}>
               <TableRow>
-                <TableCell sx={{ color: "white" }}>Mã đơn</TableCell>
-                <TableCell sx={{ color: "white" }}>Tên đơn</TableCell>
-                <TableCell sx={{ color: "white" }}>Nhà cung cấp</TableCell>
-                <TableCell sx={{ color: "white" }}>Kho hàng</TableCell>
-                <TableCell sx={{ color: "white" }}>Trạng thái</TableCell>
-                <TableCell sx={{ color: "white" }}>Ngày tạo</TableCell>
-                <TableCell sx={{ color: "white" }}>Hành động</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Mã đơn</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Tên đơn</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Nhà cung cấp</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Kho hàng</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Trạng thái</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Ngày tạo</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Hành động</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

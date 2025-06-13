@@ -24,7 +24,6 @@ import axios from "axios";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Link } from "react-router-dom";
 
 const styleModal = {
   position: "absolute",
@@ -32,12 +31,12 @@ const styleModal = {
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: 400,
-  bgcolor: "#E9E4D4",
+  bgcolor: "#F5F1E9",
   borderRadius: 2,
   boxShadow: 24,
   p: 4,
   outline: "none",
-  color: "#333333",
+  color: "#5D4037",
 };
 
 export default function Warehouses() {
@@ -51,6 +50,8 @@ export default function Warehouses() {
   const [form, setForm] = useState({ name: "", address: "" });
   const [openInventoryDialog, setOpenInventoryDialog] = useState(false);
   const [inventoryList, setInventoryList] = useState([]);
+  const [inventoryWarehouseName, setInventoryWarehouseName] = useState("");
+  const [loadingInventory, setLoadingInventory] = useState(false);
 
   const token = localStorage.getItem("token");
 
@@ -68,14 +69,20 @@ export default function Warehouses() {
   };
 
   const fetchInventoryByWarehouse = async (id) => {
+    setLoadingInventory(true);
     try {
+      const warehouse = warehouses.find(w => w.id === id);
+      setInventoryWarehouseName(warehouse?.name || "Kho");
+
       const res = await axios.get(`http://localhost:8080/warehouse/inventories/warehouse/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setInventoryList(res.data);
+      setInventoryList(res.data.result || []);
       setOpenInventoryDialog(true);
     } catch (error) {
-      console.error("Lỗi khi lấy dữ liệu kho hàng:", error);
+      console.error("Lỗi khi lấy kho:", error);
+    } finally {
+      setLoadingInventory(false);
     }
   };
 
@@ -105,29 +112,25 @@ export default function Warehouses() {
 
   const handleOpenEdit = (warehouse) => {
     setCurrentEdit(warehouse);
-    setForm({
-      name: warehouse.name || "",
-      address: warehouse.address || "",
-    });
+    setForm({ name: warehouse.name, address: warehouse.address });
     setOpenEdit(true);
   };
   const handleCloseEdit = () => {
-    setOpenEdit(false);
     setCurrentEdit(null);
+    setOpenEdit(false);
   };
 
   const handleEditWarehouse = async () => {
     try {
       await axios.put(
         `http://localhost:8080/warehouse/warehouses/${currentEdit.id}`,
-        { name: form.name, address: form.address },
-        { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+        form,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchWarehouses();
       handleCloseEdit();
     } catch (error) {
       console.error("Sửa kho lỗi:", error);
-      if (error.response) console.error("Chi tiết lỗi:", error.response.data);
     }
   };
 
@@ -136,8 +139,8 @@ export default function Warehouses() {
     setOpenDelete(true);
   };
   const handleCloseDelete = () => {
-    setOpenDelete(false);
     setCurrentDelete(null);
+    setOpenDelete(false);
   };
 
   const handleDeleteWarehouse = async () => {
@@ -153,24 +156,29 @@ export default function Warehouses() {
   };
 
   return (
-    <Box sx={{ p: 3, bgcolor: "#F5F1E9", minHeight: "100vh", color: "#333333" }}>
-      <Typography variant="h5" sx={{ mb: 2, color: "#6D5F4B" }}>Quản lý kho</Typography>
-
-      <Button variant="contained" onClick={handleOpenAdd} sx={{ mb: 2, bgcolor: "#6D5F4B", color: "#E0D7C6", "&:hover": { bgcolor: "#4A473D" }, textTransform: "none" }}>Thêm kho</Button>
+    <Box sx={{ p: 3, bgcolor: "#F5F1E9", minHeight: "100vh", color: "#5D4037" }}>
+      <Typography variant="h5" sx={{ mb: 2, color: "#5D4037" }}>Quản lý kho</Typography>
+      <Button
+        variant="contained"
+        onClick={handleOpenAdd}
+        sx={{ mb: 2, bgcolor: "#6D5F4B", ":hover": { bgcolor: "#4E342E" } }}
+      >
+        Thêm kho
+      </Button>
 
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
           <CircularProgress sx={{ color: "#6D5F4B" }} />
         </Box>
       ) : (
-        <TableContainer component={Paper} sx={{ boxShadow: "none", bgcolor: "#FFFFFF" }}>
-          <Table sx={{ minWidth: 650 }}>
+        <TableContainer component={Paper} sx={{ bgcolor: "#FFFFFF" }}>
+          <Table>
             <TableHead>
               <TableRow sx={{ bgcolor: "#E9E4D4" }}>
-                <TableCell sx={{ color: "#333333", fontWeight: "bold" }}>Tên kho</TableCell>
-                <TableCell sx={{ color: "#333333", fontWeight: "bold" }}>Địa chỉ</TableCell>
-                <TableCell sx={{ color: "#333333", fontWeight: "bold" }}>Chi tiết kho hàng</TableCell>
-                <TableCell sx={{ color: "#333333", fontWeight: "bold", textAlign: "center" }}>Thao tác</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Tên kho</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Địa chỉ</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Chi tiết</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }} align="center" >Thao tác</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -179,21 +187,13 @@ export default function Warehouses() {
                   <TableCell>{wh.name}</TableCell>
                   <TableCell>{wh.address}</TableCell>
                   <TableCell>
-                    <Button
-                      variant="text"
-                      onClick={() => fetchInventoryByWarehouse(wh.id)}
-                      sx={{ color: '#4A473D' }}
-                    >
-                      Xem chi tiết
+                    <Button onClick={() => fetchInventoryByWarehouse(wh.id)} sx={{ color: "#5D4037" }}>
+                      Xem kho hàng
                     </Button>
                   </TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    <IconButton onClick={() => handleOpenEdit(wh)} sx={{ color: "#6D5F4B" }} title="Sửa">
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton onClick={() => handleOpenDelete(wh)} sx={{ color: "#6D5F4B" }} title="Xóa">
-                      <DeleteIcon />
-                    </IconButton>
+                  <TableCell align="center">
+                    <IconButton onClick={() => handleOpenEdit(wh)} sx={{ color: "#5D4037" }}><EditIcon /></IconButton>
+                    <IconButton onClick={() => handleOpenDelete(wh)} sx={{ color: "#5D4037" }}><DeleteIcon /></IconButton>
                   </TableCell>
                 </TableRow>
               ))}
@@ -202,87 +202,101 @@ export default function Warehouses() {
         </TableContainer>
       )}
 
-      {/* Modal Thêm */}
+      {/* Dialog xem kho hàng */}
+      <Dialog open={openInventoryDialog} onClose={() => setOpenInventoryDialog(false)} maxWidth="lg" fullWidth>
+        <DialogTitle sx={{ bgcolor: "#6D5F4B", color: "#4E342E" }}>
+          Danh sách hàng trong kho: {inventoryWarehouseName}
+        </DialogTitle>
+        <DialogContent sx={{ bgcolor: "#F5F1E9" }}>
+          {loadingInventory ? (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+              <CircularProgress sx={{ color: "#6D5F4B" }} />
+            </Box>
+          ) : (
+            <TableContainer component={Paper} sx={{ mt: 2 }}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow sx={{ bgcolor: "#E9E4D4" }}>
+                    <TableCell><strong>Mã SP</strong></TableCell>
+                    <TableCell><strong>Tên SP</strong></TableCell>
+                    <TableCell><strong>Mô tả</strong></TableCell>
+                    <TableCell align="right"><strong>Tổng SL</strong></TableCell>
+                    <TableCell align="right"><strong>Còn hàng</strong></TableCell>
+                    <TableCell align="right"><strong>Đã đặt</strong></TableCell>
+                    <TableCell><strong>Đơn vị</strong></TableCell>
+                    <TableCell align="right"><strong>Giá nhập</strong></TableCell>
+                    <TableCell align="right"><strong>Thuế</strong></TableCell>
+                    <TableCell><strong>Cập nhật</strong></TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {inventoryList.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>{item.productCode}</TableCell>
+                      <TableCell>{item.productName}</TableCell>
+                      <TableCell>{item.description}</TableCell>
+                      <TableCell align="right">{item.quantity}</TableCell>
+                      <TableCell align="right">{item.quantityAvailable}</TableCell>
+                      <TableCell align="right">{item.quantityReserved}</TableCell>
+                      <TableCell>{item.unit}</TableCell>
+                      <TableCell align="right">{item.unitPrice.toLocaleString()} ₫</TableCell>
+                      <TableCell align="right">{item.taxRate}%</TableCell>
+                      <TableCell>{new Date(item.lastUpdated).toLocaleString()}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ bgcolor: "#EFEAE4" }}>
+          <Button onClick={() => setOpenInventoryDialog(false)} sx={{ color: "#5D4037" }}>
+            Đóng
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal thêm kho */}
       <Modal open={openAdd} onClose={handleCloseAdd}>
         <Box sx={styleModal}>
           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-            <Typography variant="h6" color="#6D5F4B">Thêm kho mới</Typography>
-            <IconButton onClick={handleCloseAdd} size="small" sx={{ color: "#6D5F4B" }}><CloseIcon /></IconButton>
+            <Typography variant="h6">Thêm kho mới</Typography>
+            <IconButton onClick={handleCloseAdd}><CloseIcon /></IconButton>
           </Box>
-          <TextField label="Tên kho" name="name" fullWidth size="small" sx={{ mb: 2 }} value={form.name} onChange={handleChange} />
-          <TextField label="Địa chỉ" name="address" fullWidth size="small" sx={{ mb: 2 }} value={form.address} onChange={handleChange} />
-          <Button variant="contained" onClick={handleAddWarehouse} fullWidth sx={{ bgcolor: "#6D5F4B", color: "#E0D7C6" }}>Thêm</Button>
+          <TextField label="Tên kho" name="name" fullWidth value={form.name} onChange={handleChange} sx={{ mb: 2 }} />
+          <TextField label="Địa chỉ" name="address" fullWidth value={form.address} onChange={handleChange} sx={{ mb: 2 }} />
+          <Button fullWidth variant="contained" onClick={handleAddWarehouse} sx={{ bgcolor: "#6D5F4B", color: "#fff" }}>
+            Thêm kho
+          </Button>
         </Box>
       </Modal>
 
-      {/* Modal Sửa */}
+      {/* Modal sửa kho */}
       <Modal open={openEdit} onClose={handleCloseEdit}>
         <Box sx={styleModal}>
           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-            <Typography variant="h6" color="#6D5F4B">Sửa kho</Typography>
-            <IconButton onClick={handleCloseEdit} size="small" sx={{ color: "#6D5F4B" }}><CloseIcon /></IconButton>
+            <Typography variant="h6">Sửa kho</Typography>
+            <IconButton onClick={handleCloseEdit}><CloseIcon /></IconButton>
           </Box>
-          <TextField label="Tên kho" name="name" fullWidth size="small" sx={{ mb: 2 }} value={form.name} onChange={handleChange} />
-          <TextField label="Địa chỉ" name="address" fullWidth size="small" sx={{ mb: 2 }} value={form.address} onChange={handleChange} />
-          <Button variant="contained" onClick={handleEditWarehouse} fullWidth sx={{ bgcolor: "#6D5F4B", color: "#E0D7C6" }}>Lưu thay đổi</Button>
+          <TextField label="Tên kho" name="name" fullWidth value={form.name} onChange={handleChange} sx={{ mb: 2 }} />
+          <TextField label="Địa chỉ" name="address" fullWidth value={form.address} onChange={handleChange} sx={{ mb: 2 }} />
+          <Button fullWidth variant="contained" onClick={handleEditWarehouse} sx={{ bgcolor: "#6D5F4B", color: "#fff" }}>
+            Cập nhật
+          </Button>
         </Box>
       </Modal>
 
-      {/* Dialog Xóa */}
+      {/* Dialog xác nhận xóa */}
       <Dialog open={openDelete} onClose={handleCloseDelete}>
         <DialogTitle>Xác nhận xóa</DialogTitle>
         <DialogContent>
-          <DialogContentText>Bạn có chắc chắn muốn xóa kho <b>{currentDelete?.name}</b> không?</DialogContentText>
+          <DialogContentText>
+            Bạn có chắc chắn muốn xóa kho <b>{currentDelete?.name}</b> không?
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDelete}>Hủy</Button>
           <Button onClick={handleDeleteWarehouse} color="error">Xóa</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Dialog xem kho hàng */}
-      <Dialog open={openInventoryDialog} onClose={() => setOpenInventoryDialog(false)} maxWidth="lg" fullWidth>
-        <DialogTitle>Chi tiết hàng trong kho</DialogTitle>
-        <DialogContent>
-          {inventoryList.length === 0 ? (
-            <Typography>Không có dữ liệu hàng hóa.</Typography>
-          ) : (
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Mã SP</TableCell>
-                  <TableCell>Tên SP</TableCell>
-                  <TableCell>Mô tả</TableCell>
-                  <TableCell>Số lượng</TableCell>
-                  <TableCell>Sẵn hàng</TableCell>
-                  <TableCell>Đã nhận cọc </TableCell>
-                  <TableCell>Đơn vị</TableCell>
-                  <TableCell>Giá</TableCell>
-                  <TableCell>Thuế (%)</TableCell>
-                  <TableCell>Cập nhật</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {inventoryList.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{item.productCode}</TableCell>
-                    <TableCell>{item.productName}</TableCell>
-                    <TableCell>{item.description}</TableCell>
-                    <TableCell>{item.quantity}</TableCell>
-                    <TableCell>{item.quantityAvailable}</TableCell>
-                    <TableCell>{item.quantityReserved}</TableCell>
-                    <TableCell>{item.unit}</TableCell>
-                    <TableCell>{item.unitPrice.toLocaleString()} đ</TableCell>
-                    <TableCell>{item.taxRate}</TableCell>
-                    <TableCell>{new Date(item.lastUpdated).toLocaleString()}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenInventoryDialog(false)}>Đóng</Button>
         </DialogActions>
       </Dialog>
     </Box>
