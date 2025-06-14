@@ -46,6 +46,7 @@ const [openCreateReceiveOrderDialog, setOpenCreateReceiveOrderDialog] = useState
     const [payments, setPayments] = React.useState([]);
     const [loadingPayments, setLoadingPayments] = React.useState(false);
     const [openPaymentsDialog, setOpenPaymentsDialog] = React.useState(false);
+    const [paymentError, setPaymentError] = useState("");
 
 
 
@@ -222,32 +223,47 @@ const [openCreateReceiveOrderDialog, setOpenCreateReceiveOrderDialog] = useState
 
     //Payment
 // Khi bấm nút Tạo thanh toán:
-const handleCreatePayment = () => {
-  if (!purchaseInvoice) {
+  const handleCreatePayment = () => {
+  if (!selectedInvoice) {
     alert('Không có hóa đơn để thanh toán');
     return;
   }
 
+  const token = localStorage.getItem('token');
   const data = {
-    amount: purchaseInvoice.totalAmount,  // hoặc số tiền bạn muốn thanh toán
-    paymentMethod: 'BANK_TRANSFER',
-    note: `Thanh toán hóa đơn số ${purchaseInvoice.id}`,
+    amount: Number(paymentAmount), // Sử dụng số tiền người dùng nhập
+    paymentMethod,
+    note: paymentNote || `Thanh toán hóa đơn số ${selectedInvoice.code}`,
   };
 
-  fetch(`http://localhost:8080/warehouse/payments/${purchaseInvoice.id}`, {
+  fetch(`http://localhost:8080/warehouse/payments/${selectedInvoice.id}`, {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
     body: JSON.stringify(data),
   })
-  .then(res => res.json())
-  .then(res => {
-    console.log('Thanh toán thành công:', res);
-    // Đóng dialog hoặc cập nhật UI
-  })
-  .catch(err => {
-    console.error(err);
-  });
+    .then(async (res) => {
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Lỗi ${res.status}: ${errorText}`);
+      }
+      return res.json();
+    })
+    .then((res) => {
+      console.log('Thanh toán thành công:', res);
+      alert('Thanh toán thành công!');
+      setOpenCreatePaymentDialog(false);
+      setPaymentAmount('');
+      setPaymentNote('');
+    })
+    .catch((err) => {
+      console.error(err);
+      alert(`Tạo thanh toán thất bại: ${err.message}`);
+    });
 };
+
 
 
 
@@ -691,9 +707,8 @@ const handleCreatePayment = () => {
 </Dialog>
 
  {/* Thông tin hóa đơn */}
- <Dialog
+<Dialog
   open={openInvoiceDialog}
-  set
   onClose={handleCloseInvoice}
   fullWidth
   maxWidth="md"
@@ -711,14 +726,16 @@ const handleCreatePayment = () => {
       </Typography>
     ) : (
       <TableContainer component={Paper} sx={{ maxHeight: 300, bgcolor: '#F8EFE8' }}>
-        <Table stickyHeader size="small" aria-label="Danh sách hóa đơn mua">
+        <Table stickyHeader size="small">
           <TableHead>
             <TableRow sx={{ bgcolor: '#8C6744' }}>
               <TableCell sx={{ color: '#333', fontWeight: 'bold' }}>Mã hóa đơn</TableCell>
               <TableCell sx={{ color: '#333', fontWeight: 'bold' }}>Ngày tạo</TableCell>
               <TableCell sx={{ color: '#333', fontWeight: 'bold' }}>Nhà cung cấp</TableCell>
               <TableCell sx={{ color: '#333', fontWeight: 'bold' }}>Tổng tiền</TableCell>
+              <TableCell sx={{ color: '#333', fontWeight: 'bold' }}>Còn thiếu</TableCell>              
               <TableCell sx={{ color: '#333', fontWeight: 'bold' }}>Trạng thái</TableCell>
+              <TableCell sx={{ color: '#333', fontWeight: 'bold' }}>Hành động</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -727,21 +744,40 @@ const handleCreatePayment = () => {
                 key={pi.id}
                 sx={{
                   bgcolor: selectedInvoice?.id === pi.id ? '#C4A484' : '#F1E4DA',
-                  cursor: 'pointer',
                 }}
-                onClick={() => setSelectedInvoice(pi)}
               >
-                <TableCell sx={{ color: '#5B3A29' }}>{pi.code}</TableCell>
-                <TableCell sx={{ color: '#5B3A29' }}>{new Date(pi.createdAt).toLocaleString()}</TableCell>
-                <TableCell sx={{ color: '#5B3A29' }}>{pi.supplierName}</TableCell>
-                <TableCell sx={{ color: '#5B3A29' }}>
+                <TableCell>{pi.code}</TableCell>
+                <TableCell>{new Date(pi.createdAt).toLocaleString()}</TableCell>
+                <TableCell>{pi.supplierName}</TableCell>
+                <TableCell>
                   {pi.totalAmount.toLocaleString('vi-VN', {
                     style: 'currency',
                     currency: 'VND',
                   })}
                 </TableCell>
-                <TableCell sx={{ color: pi.status === 'UNPAID' ? '#D2691E' : '#3E7D32', fontWeight: 'bold' }}>
+                <TableCell>
+                  {pi.remainingAmount.toLocaleString('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND',
+                  })}
+                </TableCell>              
+
+                <TableCell>
                   {pi.status}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    sx={{ backgroundColor: '#6B4C3B', color: '#fff' }}
+                    onClick={() => {
+                      setSelectedInvoice(pi);
+                      setOpenCreatePaymentDialog(true);
+                    }}
+                    disabled={pi.status === 'PAID'}
+                  >
+                    Tạo thanh toán
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -752,25 +788,12 @@ const handleCreatePayment = () => {
   </DialogContent>
 
   <DialogActions sx={{ backgroundColor: '#F3E6DC', padding: 2 }}>
-    <Button
-      onClick={() => {
-        if (!selectedInvoice) {
-          alert('Vui lòng chọn hóa đơn để thanh toán');
-          return;
-        }
-        setOpenCreatePaymentDialog(true);
-      }}
-      variant="contained"
-      sx={{ backgroundColor: '#6B4C3B', color: '#fff', mr: 1 }}
-    >
-      Tạo thanh toán
-    </Button>
-
     <Button onClick={handleCloseInvoice} sx={{ color: '#6B4C3B' }}>
       Đóng
     </Button>
   </DialogActions>
 </Dialog>
+
 
 
 <Dialog open={openPaymentsDialog} onClose={handleClosePaymentsDialog} fullWidth maxWidth="md">
@@ -822,103 +845,46 @@ const handleCreatePayment = () => {
   </DialogActions>
 </Dialog>
 
-{/* Tạo thanh toán */}
-{/* <Dialog open={openCreatePaymentDialog} onClose={() => setOpenCreatePaymentDialog(false)} fullWidth maxWidth="sm">
+  {/* Tạo thanh toán */}
+  <Dialog open={openCreatePaymentDialog} onClose={() => setOpenCreatePaymentDialog(false)} fullWidth maxWidth="sm">
   <DialogTitle sx={{ backgroundColor: '#6B4C3B', color: '#fff' }}>
     Thanh toán hóa đơn
   </DialogTitle>
 
   <DialogContent sx={{ backgroundColor: '#F9F1EB' }}>
-    <TextField
-      fullWidth
-      label="Số tiền thanh toán"
-      type="number"
-      value={paymentAmount}
-      onChange={(e) => setPaymentAmount(e.target.value)}
-      margin="normal"
-      InputProps={{ inputProps: { min: 0 } }}
-    />
-
-    <FormControl fullWidth margin="normal">
-      <InputLabel>Phương thức thanh toán</InputLabel>
-      <Select
-        value={paymentMethod}
-        onChange={(e) => setPaymentMethod(e.target.value)}
-        label="Phương thức thanh toán"
-      >
-        {paymentMethods.map((method) => (
-          <MenuItem key={method.value} value={method.value}>
-            {method.label}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+    {selectedInvoice && (
+      <>
+        <Typography><strong>Mã hóa đơn:</strong> {selectedInvoice.code}</Typography>
+        <Typography><strong>Tổng tiền:</strong> {selectedInvoice.totalAmount.toLocaleString('vi-VN')} ₫</Typography>
+        <Typography><strong>Đã thanh toán:</strong> {selectedInvoice.paidAmount?.toLocaleString('vi-VN') || 0} ₫</Typography>
+        <Typography sx={{ mb: 2 }}>
+          <strong>Còn phải thanh toán:</strong> {(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocaleString('vi-VN')} ₫
+        </Typography>
+      </>
+    )}
 
     <TextField
-      fullWidth
-      label="Ghi chú"
-      value={paymentNote}
-      onChange={(e) => setPaymentNote(e.target.value)}
-      multiline
-      rows={2}
-      margin="normal"
-    />
-  </DialogContent>
+  fullWidth
+  label="Số tiền thanh toán"
+  type="number"
+  value={paymentAmount}
+  onChange={(e) => {
+    const value = Number(e.target.value);
+    const max = selectedInvoice ? selectedInvoice.totalAmount - (selectedInvoice.paidAmount || 0) : 0;
 
-  <DialogActions sx={{ backgroundColor: '#F3E6DC', padding: 2 }}>
-    <Button onClick={() => setOpenCreatePaymentDialog(false)} sx={{ color: '#6B4C3B' }}>
-      Hủy
-    </Button>
-<Button
-  onClick={() => {
-    setPurchaseInvoice(selectedInvoice);
-    handleCreatePayment();
+    if (value > max) {
+      setPaymentError(`Không được vượt quá ${max.toLocaleString('vi-VN')} ₫`);
+    } else {
+      setPaymentError(""); // Xóa lỗi nếu hợp lệ
+    }
+
+    setPaymentAmount(value);
   }}
-  variant="contained"
-  sx={{ backgroundColor: '#6B4C3B', color: '#fff' }}
->
-  Tạo thanh toán
-</Button>
+  margin="normal"
+  error={!!paymentError}
+  helperText={paymentError}
+/>
 
-  </DialogActions>
-</Dialog>
- */}
-
-
- <Dialog open={openCreatePaymentDialog} onClose={() => setOpenCreatePaymentDialog(false)} fullWidth maxWidth="sm">
-  <DialogTitle sx={{ backgroundColor: '#6B4C3B', color: '#fff' }}>
-    Thanh toán hóa đơn
-  </DialogTitle>
-
-  <DialogContent sx={{ backgroundColor: '#F9F1EB' }}>
-    {/* Số tiền còn thiếu */}
-    <TextField
-      fullWidth
-      label="Số tiền còn thiếu"
-      value={
-        selectedInvoice
-          ? (selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocaleString('vi-VN', {
-              style: 'currency',
-              currency: 'VND'
-            })
-          : '0 VND'
-      }
-      margin="normal"
-      InputProps={{ readOnly: true }}
-    />
-
-    {/* Số tiền thanh toán */}
-    <TextField
-      fullWidth
-      label="Số tiền thanh toán"
-      type="number"
-      value={paymentAmount}
-      onChange={(e) => setPaymentAmount(e.target.value)}
-      margin="normal"
-      InputProps={{ inputProps: { min: 0 } }}
-    />
-
-    {/* Phương thức thanh toán */}
     <FormControl fullWidth margin="normal">
       <InputLabel>Phương thức thanh toán</InputLabel>
       <Select
@@ -934,7 +900,6 @@ const handleCreatePayment = () => {
       </Select>
     </FormControl>
 
-    {/* Ghi chú */}
     <TextField
       fullWidth
       label="Ghi chú"
@@ -962,6 +927,7 @@ const handleCreatePayment = () => {
     </Button>
   </DialogActions>
 </Dialog>
+
 
 
     </Paper>
