@@ -546,48 +546,48 @@ const [openCreateReceiveOrderDialog, setOpenCreateReceiveOrderDialog] = useState
       <Typography variant="h6" sx={{ color: '#5D4037' }}>Danh sách sản phẩm:</Typography>
 
 
-<TableContainer component={Paper} sx={{ maxWidth: '80vw', mx: 'auto', mt: 2 }}>
-  <Table size="small" aria-label="Danh sách sản phẩm phiếu nhập">
-    <TableHead>
-      <TableRow sx={{ bgcolor: '#f0f0f0' }}>
-        <TableCell><strong>#</strong></TableCell>
-        <TableCell><strong>Sản phẩm</strong></TableCell>
-        <TableCell align="right"><strong>Số lượng</strong></TableCell>
-        <TableCell align="right"><strong>Đơn giá</strong></TableCell>
-        <TableCell align="right"><strong>Thuế VAT (%)</strong></TableCell>
-        <TableCell align="right"><strong>Thành tiền</strong></TableCell>
-      </TableRow>
-    </TableHead>
-    <TableBody>
-      {selectedReceiveOrder?.items?.map((item, idx) => (
-        <TableRow key={item.id} hover>
-          <TableCell>{idx + 1}</TableCell>
-          <TableCell>
-            <Typography variant="body1" fontWeight="bold">
-              {item.productName}
-            </Typography>
-          </TableCell>
-          <TableCell align="right">{item.quantity}</TableCell>
-          <TableCell align="right">
-            {Number(item.unitPrice).toLocaleString('vi-VN', {
-              style: 'currency',
-              currency: 'VND',
-              minimumFractionDigits: 0,
-            })}
-          </TableCell>
-          <TableCell align="right">{item.taxRate}</TableCell>
-          <TableCell align="right" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-            {Number(item.totalPrice).toLocaleString('vi-VN', {
-              style: 'currency',
-              currency: 'VND',
-              minimumFractionDigits: 0,
-            })}
-          </TableCell>
-        </TableRow>
-      ))}
-    </TableBody>
-  </Table>
-</TableContainer>
+      <TableContainer component={Paper} sx={{ maxWidth: '80vw', mx: 'auto', mt: 2 }}>
+        <Table size="small" aria-label="Danh sách sản phẩm phiếu nhập">
+          <TableHead>
+            <TableRow sx={{ bgcolor: '#f0f0f0' }}>
+              <TableCell><strong>#</strong></TableCell>
+              <TableCell><strong>Sản phẩm</strong></TableCell>
+              <TableCell align="right"><strong>Số lượng</strong></TableCell>
+              <TableCell align="right"><strong>Đơn giá</strong></TableCell>
+              <TableCell align="right"><strong>Thuế VAT (%)</strong></TableCell>
+              <TableCell align="right"><strong>Thành tiền</strong></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {selectedReceiveOrder?.items?.map((item, idx) => (
+              <TableRow key={item.id} hover>
+                <TableCell>{idx + 1}</TableCell>
+                <TableCell>
+                  <Typography variant="body1" fontWeight="bold">
+                    {item.productName}
+                  </Typography>
+                </TableCell>
+                <TableCell align="right">{item.quantity}</TableCell>
+                <TableCell align="right">
+                  {Number(item.unitPrice).toLocaleString('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND',
+                    minimumFractionDigits: 0,
+                  })}
+                </TableCell>
+                <TableCell align="right">{item.taxRate}</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                  {Number(item.totalPrice).toLocaleString('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND',
+                    minimumFractionDigits: 0,
+                  })}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Box>
   </DialogContent>
 
@@ -795,7 +795,7 @@ const [openCreateReceiveOrderDialog, setOpenCreateReceiveOrderDialog] = useState
 </Dialog>
 
 
-
+{/* Danh sách thanh toán */}
 <Dialog open={openPaymentsDialog} onClose={handleClosePaymentsDialog} fullWidth maxWidth="md">
   <DialogTitle sx={{ backgroundColor: '#8D6E63', color: '#fff' }}>
     Danh sách thanh toán - Hóa đơn: {purchaseInvoice?.code || ''}
@@ -856,9 +856,8 @@ const [openCreateReceiveOrderDialog, setOpenCreateReceiveOrderDialog] = useState
       <>
         <Typography><strong>Mã hóa đơn:</strong> {selectedInvoice.code}</Typography>
         <Typography><strong>Tổng tiền:</strong> {selectedInvoice.totalAmount.toLocaleString('vi-VN')} ₫</Typography>
-        <Typography><strong>Đã thanh toán:</strong> {selectedInvoice.paidAmount?.toLocaleString('vi-VN') || 0} ₫</Typography>
         <Typography sx={{ mb: 2 }}>
-          <strong>Còn phải thanh toán:</strong> {(selectedInvoice.totalAmount - selectedInvoice.paidAmount).toLocaleString('vi-VN')} ₫
+          <strong>Còn nợ:</strong> {(selectedInvoice.remainingAmount).toLocaleString('vi-VN')} ₫
         </Typography>
       </>
     )}

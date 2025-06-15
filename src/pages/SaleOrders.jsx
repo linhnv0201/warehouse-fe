@@ -318,16 +318,25 @@ if (view === "create") {
         Thêm sản phẩm
       </Button>
 
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+      <Box sx={{ mt: 3 }}>
         <Button
           variant="contained"
           onClick={handleSubmit}
-          sx={{ width: "100%", bgcolor: "#6D5F4B", color: "#fff", '&:hover': { bgcolor: "#5a4d3a" } }}
           disabled={loadingCreate || loadingProducts}
+          sx={{ mr: 2, bgcolor: "#6D5F4B", '&:hover': { bgcolor: "#5a4d3a" } }}
         >
           {loadingCreate ? <CircularProgress size={24} sx={{ color: "#fff" }} /> : "Tạo đơn hàng"}
         </Button>
+
+        <Button
+          variant="outlined"
+          onClick={() => setView("list")}
+          disabled={loadingCreate || loadingProducts}
+        >
+          Hủy
+        </Button>
       </Box>
+
     </Box>
   );
 }
