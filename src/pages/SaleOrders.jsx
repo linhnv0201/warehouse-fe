@@ -371,6 +371,7 @@ return (
           onChange={(e) => setFilterStatus(e.target.value)}
         >
           <MenuItem value="ALL">Tất cả đơn hàng</MenuItem>
+          <MenuItem value="PENDING">Đơn đang chờ</MenuItem>
           <MenuItem value="APPROVED">Đơn đã duyệt</MenuItem>
           <MenuItem value="CANCELLED">Đơn đã hủy</MenuItem>
           <MenuItem value="COMPLETED">Đơn đã hoàn thành</MenuItem>

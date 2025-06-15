@@ -152,8 +152,7 @@ export default function Employees() {
   const handleEditEmployee = async () => {
     try {
       const token = localStorage.getItem("token");
-      // Gửi PATCH hoặc PUT tuỳ API (ở đây giả sử PATCH)
-      await axios.patch(`http://localhost:8080/warehouse/users/${currentEdit.id}`, form, {
+      await axios.put(`http://localhost:8080/warehouse/users/${currentEdit.id}`, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchEmployees();

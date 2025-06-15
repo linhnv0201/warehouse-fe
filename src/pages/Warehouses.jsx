@@ -52,6 +52,7 @@ export default function Warehouses() {
   const [inventoryList, setInventoryList] = useState([]);
   const [inventoryWarehouseName, setInventoryWarehouseName] = useState("");
   const [loadingInventory, setLoadingInventory] = useState(false);
+  const [totalValue, setTotalValue] = useState(0);
 
   const token = localStorage.getItem("token");
 
@@ -72,19 +73,30 @@ export default function Warehouses() {
     setLoadingInventory(true);
     try {
       const warehouse = warehouses.find(w => w.id === id);
-      setInventoryWarehouseName(warehouse?.name || "Kho");
+      setInventoryWarehouseName(warehouse?.name || "");
 
       const res = await axios.get(`http://localhost:8080/warehouse/inventories/warehouse/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` }
       });
-      setInventoryList(res.data.result || []);
+      const inv = res.data.result || [];
+      setInventoryList(inv);
+      
+      // Tính tổng giá trị hàng hóa
+      const sum = inv.reduce((acc, item) =>
+        acc + item.quantityAvailable * item.unitPrice * (1 + item.taxRate / 100), 0
+      );
+      setTotalValue(sum);
       setOpenInventoryDialog(true);
-    } catch (error) {
-      console.error("Lỗi khi lấy kho:", error);
+    } catch (err) {
+      console.error("Lỗi khi lấy kho:", err);
     } finally {
       setLoadingInventory(false);
     }
   };
+
+  useEffect(() => {
+    fetchWarehouses();
+  }, []);
 
   useEffect(() => {
     fetchWarehouses();
@@ -204,57 +216,65 @@ export default function Warehouses() {
 
       {/* Dialog xem kho hàng */}
       <Dialog open={openInventoryDialog} onClose={() => setOpenInventoryDialog(false)} maxWidth="lg" fullWidth>
-        <DialogTitle sx={{ bgcolor: "#6D5F4B", color: "#4E342E" }}>
-          Danh sách hàng trong kho: {inventoryWarehouseName}
-        </DialogTitle>
-        <DialogContent sx={{ bgcolor: "#F5F1E9" }}>
-          {loadingInventory ? (
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
-              <CircularProgress sx={{ color: "#6D5F4B" }} />
-            </Box>
-          ) : (
-            <TableContainer component={Paper} sx={{ mt: 2 }}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow sx={{ bgcolor: "#E9E4D4" }}>
-                    <TableCell><strong>Mã SP</strong></TableCell>
-                    <TableCell><strong>Tên SP</strong></TableCell>
-                    <TableCell><strong>Mô tả</strong></TableCell>
-                    <TableCell align="right"><strong>Tổng SL</strong></TableCell>
-                    <TableCell align="right"><strong>Còn hàng</strong></TableCell>
-                    <TableCell align="right"><strong>Đã đặt</strong></TableCell>
-                    <TableCell><strong>Đơn vị</strong></TableCell>
-                    <TableCell align="right"><strong>Giá nhập</strong></TableCell>
-                    <TableCell align="right"><strong>Thuế</strong></TableCell>
-                    <TableCell><strong>Cập nhật</strong></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {inventoryList.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{item.productCode}</TableCell>
-                      <TableCell>{item.productName}</TableCell>
-                      <TableCell>{item.description}</TableCell>
-                      <TableCell align="right">{item.quantity}</TableCell>
-                      <TableCell align="right">{item.quantityAvailable}</TableCell>
-                      <TableCell align="right">{item.quantityReserved}</TableCell>
-                      <TableCell>{item.unit}</TableCell>
-                      <TableCell align="right">{item.unitPrice.toLocaleString()} ₫</TableCell>
-                      <TableCell align="right">{item.taxRate}%</TableCell>
-                      <TableCell>{new Date(item.lastUpdated).toLocaleString()}</TableCell>
+          <DialogTitle sx={{ bgcolor: "#6D5F4B", color: "#FFF" }}>
+            Danh sách hàng trong kho: <strong>{inventoryWarehouseName}</strong>
+          </DialogTitle>
+
+          <DialogContent sx={{ bgcolor: "#F5F1E9" }}>
+            {loadingInventory ? (
+              <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+                <CircularProgress sx={{ color: "#6D5F4B" }} />
+              </Box>
+            ) : (
+              <TableContainer component={Paper} sx={{ mt: 2 }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow sx={{ bgcolor: "#E9E4D4" }}>
+                      <TableCell><strong>Mã SP</strong></TableCell>
+                      <TableCell><strong>Tên SP</strong></TableCell>
+                      <TableCell><strong>Mô tả</strong></TableCell>
+                      <TableCell align="right"><strong>Tổng SL</strong></TableCell>
+                      <TableCell align="right"><strong>Còn hàng</strong></TableCell>
+                      <TableCell align="right"><strong>Đã đặt</strong></TableCell>
+                      <TableCell><strong>Đơn vị</strong></TableCell>
+                      <TableCell align="right"><strong>Giá nhập</strong></TableCell>
+                      <TableCell align="right"><strong>Thuế</strong></TableCell>
+                      <TableCell><strong>Cập nhật</strong></TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </DialogContent>
-        <DialogActions sx={{ bgcolor: "#EFEAE4" }}>
+                  </TableHead>
+                  <TableBody>
+                    {inventoryList.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell>{item.productCode}</TableCell>
+                        <TableCell>{item.productName}</TableCell>
+                        <TableCell>{item.description}</TableCell>
+                        <TableCell align="right">{item.quantity}</TableCell>
+                        <TableCell align="right">{item.quantityAvailable}</TableCell>
+                        <TableCell align="right">{item.quantityReserved}</TableCell>
+                        <TableCell>{item.unit}</TableCell>
+                        <TableCell align="right">{item.unitPrice.toLocaleString()} ₫</TableCell>
+                        <TableCell align="right">{item.taxRate}%</TableCell>
+                        <TableCell>{new Date(item.lastUpdated).toLocaleString("vi-VN")}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </DialogContent>
+
+      <DialogActions sx={{ bgcolor: "#EFEAE4", justifyContent: "flex-end", px: 3 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <Typography sx={{ fontWeight: "bold", color: "#5D4037" }}>
+            Tổng giá trị: {totalValue.toLocaleString("vi-VN")} ₫
+          </Typography>
           <Button onClick={() => setOpenInventoryDialog(false)} sx={{ color: "#5D4037" }}>
             Đóng
           </Button>
-        </DialogActions>
-      </Dialog>
+        </Box>
+      </DialogActions>
+
+        </Dialog>
 
       {/* Modal thêm kho */}
       <Modal open={openAdd} onClose={handleCloseAdd}>

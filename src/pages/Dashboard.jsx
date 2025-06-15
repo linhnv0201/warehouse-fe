@@ -32,6 +32,8 @@ const menuItems = [
   { label: "Quản lý nhà cung cấp", path: "suppliers" },
   { label: "Quản lý khách hàng", path: "customers" },
   { label: "Quản lý sản phẩm thị trường", path: "products" },
+  { label: "Thống kê", path: "statistics" },
+
 ];
 
 export default function Dashboard() {
