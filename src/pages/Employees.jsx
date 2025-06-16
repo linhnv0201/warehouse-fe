@@ -152,9 +152,24 @@ export default function Employees() {
   const handleEditEmployee = async () => {
     try {
       const token = localStorage.getItem("token");
-      await axios.put(`http://localhost:8080/warehouse/users/${currentEdit.id}`, form, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+
+      const updateData = {
+        fullname: form.fullname,
+        phone: form.phone,
+        address: form.address,
+        role: form.role,
+      };
+
+        // Chỉ thêm password nếu người dùng nhập
+        if (form.password?.trim()) {
+          updateData.password = form.password;
+        }
+
+        await axios.put(`http://localhost:8080/warehouse/users/${currentEdit.id}`, updateData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+
       fetchEmployees();
       handleCloseEdit();
     } catch (error) {
@@ -222,11 +237,66 @@ export default function Employees() {
           <TableBody>
             {employees.map((emp) => (
               <TableRow key={emp.id} sx={{ bgcolor: "#FFFFFF" }}>
-                <TableCell sx={{ color: "#333333" }}>{emp.email}</TableCell>
-                <TableCell sx={{ color: "#333333" }}>{emp.fullname || "(Chưa có)"}</TableCell>
-                <TableCell sx={{ color: "#333333" }}>{emp.phone || "(Chưa có)"}</TableCell>
-                <TableCell sx={{ color: "#333333" }}>{emp.address || "(Chưa có)"}</TableCell>
-                <TableCell sx={{ color: "#333333" }}>{emp.role?.join(", ")}</TableCell>
+                <TableCell
+                  sx={{
+                    color: "#333333",
+                    maxWidth: 180,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                  title={emp.email}
+                >
+                  {emp.email}
+                </TableCell>
+                <TableCell
+                  sx={{
+                    color: "#333333",
+                    maxWidth: 150,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                  title={emp.fullname || "(Chưa có)"}
+                >
+                  {emp.fullname || "(Chưa có)"}
+                </TableCell>
+                <TableCell
+                  sx={{
+                    color: "#333333",
+                    maxWidth: 130,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                  title={emp.phone || "(Chưa có)"}
+                >
+                  {emp.phone || "(Chưa có)"}
+                </TableCell>
+                <TableCell
+                  sx={{
+                    color: "#333333",
+                    maxWidth: 200,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                  title={emp.address || "(Chưa có)"}
+                >
+                  {emp.address || "(Chưa có)"}
+                </TableCell>
+                <TableCell
+                  sx={{
+                    color: "#333333",
+                    maxWidth: 180,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                  title={emp.role?.join(", ")}
+                >
+                  {emp.role?.join(", ")}
+                </TableCell>
                 <TableCell sx={{ textAlign: "center" }}>
                   <IconButton
                     onClick={() => handleOpenEdit(emp)}
@@ -246,6 +316,7 @@ export default function Employees() {
               </TableRow>
             ))}
           </TableBody>
+
         </Table>
       </TableContainer>
 

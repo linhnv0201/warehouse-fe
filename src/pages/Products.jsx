@@ -49,6 +49,9 @@ export default function Products() {
   const [openDelete, setOpenDelete] = useState(false);
   const [currentDelete, setCurrentDelete] = useState(null);
 
+  const [selectedSupplierId, setSelectedSupplierId] = useState("");
+
+
   const [form, setForm] = useState({
     code: "",
     name: "",
@@ -87,6 +90,23 @@ export default function Products() {
       console.error(error);
     }
   };
+
+  const handleFilterBySupplier = async (supplierId) => {
+  setSelectedSupplierId(supplierId);
+  if (!supplierId) {
+    fetchProducts(); // Nếu bỏ lọc
+    return;
+  }
+  try {
+    const res = await axios.get(`http://localhost:8080/warehouse/products/supplier/${supplierId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setProducts(res.data.result);
+  } catch (error) {
+    console.error("Lỗi lọc sản phẩm theo nhà cung cấp:", error);
+  }
+};
+
 
   useEffect(() => {
     fetchProducts();
@@ -240,25 +260,59 @@ export default function Products() {
         Quản lý sản phẩm
       </Typography>
 
-      <Button
-        variant="contained"
-        onClick={() => {
-          setForm({
-            code: "",
-            name: "",
-            description: "",
-            unit: "",
-            unitPrice: "",
-            taxRate: "",
-            supplierId: "",
-          });
-          setErrorMessage("");
-          setOpenAdd(true);
-        }}
-        sx={{ mb: 2, bgcolor: "#6D5F4B", color: "#E0D7C6", "&:hover": { bgcolor: "#4A473D" }, textTransform: "none" }}
-      >
-        Thêm sản phẩm
-      </Button>
+      <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 2 }}>
+        <Button
+          variant="contained"
+          onClick={() => {
+            setForm({
+              code: "",
+              name: "",
+              description: "",
+              unit: "",
+              unitPrice: "",
+              taxRate: "",
+              supplierId: "",
+            });
+            setErrorMessage("");
+            setOpenAdd(true);
+          }}
+          sx={{
+            bgcolor: "#6D5F4B",
+            color: "#E0D7C6",
+            "&:hover": { bgcolor: "#4A473D" },
+            textTransform: "none",
+          }}
+        >
+          Thêm sản phẩm
+        </Button>
+
+        <FormControl
+          size="small"
+          sx={{
+            minWidth: 250,
+            '& .MuiOutlinedInput-notchedOutline': { borderColor: "#6D5F4B" },
+            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: "#6D5F4B" },
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: "#6D5F4B" },
+          }}
+        >
+          <InputLabel id="filter-supplier-label" sx={{ color: "#6D5F4B" }}>
+            Lọc theo nhà cung cấp
+          </InputLabel>
+          <Select
+            labelId="filter-supplier-label"
+            value={selectedSupplierId}
+            label="Lọc theo nhà cung cấp"
+            onChange={(e) => handleFilterBySupplier(e.target.value)}
+          >
+            <MenuItem value="">-- Tất cả nhà cung cấp --</MenuItem>
+            {suppliers.map((sup) => (
+              <MenuItem key={sup.id} value={sup.id}>
+                {sup.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
 
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
