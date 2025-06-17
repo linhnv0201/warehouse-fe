@@ -107,55 +107,62 @@ export default function SaleOrders() {
       .finally(() => setLoadingProducts(false));
   }, [selectedWarehouse, token]);
 
-  // Tạo đơn hàng
-  const handleSubmit = async () => {
-    if (!orderName || !selectedCustomer || !selectedWarehouse) {
-      alert("Vui lòng điền đầy đủ thông tin");
-      return;
-    }
-    if (
-      items.some(
-        (item) =>
-          !item.inventoryId ||
-          item.quantity <= 0 ||
-          item.saleUnitPrice <= 0
-      )
-    ) {
+const handleSubmit = async () => {
+  if (!orderName || !selectedCustomer || !selectedWarehouse) {
+    alert("Vui lòng điền đầy đủ thông tin");
+    return;
+  }
+
+  for (let item of items) {
+    if (!item.inventoryId || item.quantity <= 0 || item.saleUnitPrice <= 0) {
       alert("Vui lòng chọn sản phẩm, số lượng và đơn giá hợp lệ");
       return;
     }
 
-    const payload = {
-      customerId: Number(selectedCustomer),
-      warehouseId: Number(selectedWarehouse),
-      saleName: orderName,
-      items: items.map(({ inventoryId, quantity, saleUnitPrice }) => ({
-        inventoryId,
-        quantity,
-        saleUnitPrice,
-      })),
-    };
-
-    setLoadingCreate(true);
-    try {
-      const res = await axios.post("http://localhost:8080/warehouse/sales-orders", payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      alert("Tạo đơn hàng bán thành công!");
-      console.log("Kết quả:", res.data.result);
-      setView("list");
-      setOrderName("");
-      setSelectedCustomer("");
-      setSelectedWarehouse("");
-      setItems([{ inventoryId: "", quantity: 1, saleUnitPrice: 0 }]);
-      fetchOrders();
-    } catch (error) {
-      console.error("Lỗi tạo đơn hàng bán:", error);
-      alert("Tạo đơn hàng bán thất bại");
-    } finally {
-      setLoadingCreate(false);
+    if (item.quantity > item.quantityAvailable) {
+      alert(
+        `Sản phẩm vượt quá tồn kho. Bạn đang đặt ${item.quantity} trong khi chỉ còn ${item.quantityAvailable} sản phẩm trong kho.`
+      );
+      return;
     }
+  }
+
+  const payload = {
+    customerId: Number(selectedCustomer),
+    warehouseId: Number(selectedWarehouse),
+    saleName: orderName,
+    items: items.map(({ inventoryId, quantity, saleUnitPrice }) => ({
+      inventoryId,
+      quantity,
+      saleUnitPrice,
+    })),
   };
+
+  setLoadingCreate(true);
+  try {
+    const res = await axios.post(
+      "http://localhost:8080/warehouse/sales-orders",
+      payload,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    alert("Tạo đơn hàng bán thành công!");
+    console.log("Kết quả:", res.data.result);
+    setView("list");
+    setOrderName("");
+    setSelectedCustomer("");
+    setSelectedWarehouse("");
+    setItems([{ inventoryId: "", quantity: 1, saleUnitPrice: 0 }]);
+    fetchOrders();
+  } catch (error) {
+    console.error("Lỗi tạo đơn hàng bán:", error);
+    alert("Tạo đơn hàng bán thất bại");
+  } finally {
+    setLoadingCreate(false);
+  }
+};
+
 
   const handleAddItem = () =>
     setItems((prev) => [...prev, { inventoryId: "", quantity: 1, saleUnitPrice: 0 }]);

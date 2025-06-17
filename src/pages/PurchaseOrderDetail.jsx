@@ -167,12 +167,20 @@ const [openCreateReceiveOrderDialog, setOpenCreateReceiveOrderDialog] = useState
   }
     };
 
-    const handleCreateReceiveOrder = async (purchaseOrderId) => {
+const handleCreateReceiveOrder = async (purchaseOrderId) => {
   try {
-    const itemsToReceive = receiveQuantities.map(item => ({
-      purchaseOrderItemId: item.id,
-      quantity: parseInt(item.quantity) || 0
-    }));
+    const itemsToReceive = receiveQuantities
+      .map(item => ({
+        purchaseOrderItemId: item.id,
+        quantity: parseInt(item.quantity) || 0
+      }))
+      .filter(item => item.quantity > 0); // ✅ Chỉ giữ lại các item có số lượng > 0
+
+    // ✅ Nếu không có mặt hàng nào được nhập
+    if (itemsToReceive.length === 0) {
+      alert("Vui lòng nhập số lượng cho ít nhất một mặt hàng.");
+      return;
+    }
 
     const receiveOrderData = {
       shippingCost: parseFloat(shippingCost) || 0,
@@ -182,20 +190,23 @@ const [openCreateReceiveOrderDialog, setOpenCreateReceiveOrderDialog] = useState
     await axios.post(
       `http://localhost:8080/warehouse/receive-orders/${purchaseOrderId}`,
       receiveOrderData,
-            {
+      {
         headers: {
-          Authorization: `Bearer ${token}`, // <-- Đảm bảo token đúng
+          Authorization: `Bearer ${token}`,
         }
       }
     );
 
     setOpenCreateReceiveOrderDialog(false);
     // toast.success("Tạo phiếu nhập thành công!");
+    alert("Tạo phiếu nhập thành công!");
   } catch (error) {
     console.error("Lỗi khi tạo phiếu nhập:", error);
     // toast.error("Tạo phiếu nhập thất bại!");
+    alert("Tạo phiếu nhập thất bại!");
   }
-    };
+};
+
   // Kết thúc tạo phiếu nhập
 
   //Chi tiết phiếu nhập
@@ -857,7 +868,7 @@ const [openCreateReceiveOrderDialog, setOpenCreateReceiveOrderDialog] = useState
         <Typography><strong>Mã hóa đơn:</strong> {selectedInvoice.code}</Typography>
         <Typography><strong>Tổng tiền:</strong> {selectedInvoice.totalAmount.toLocaleString('vi-VN')} ₫</Typography>
         <Typography sx={{ mb: 2 }}>
-          <strong>Còn nợ:</strong> {(selectedInvoice.remainingAmount).toLocaleString('vi-VN')} ₫
+          <strong>Còn nợ:</strong> {(selectedInvoice.re).toLocaleString('vi-VN')} ₫
         </Typography>
       </>
     )}

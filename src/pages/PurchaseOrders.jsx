@@ -268,7 +268,7 @@ useEffect(() => {
                 <MenuItem value=""><em>Chọn sản phẩm</em></MenuItem>
                 {products.map((p) => (
                   <MenuItem key={p.id} value={p.id}>
-                    {p.name}
+                  {`${p.code} - ${p.name} - Giá mua ${p.unitPrice.toLocaleString()}₫`}
                   </MenuItem>
                 ))}
               </Select>
