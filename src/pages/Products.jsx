@@ -51,6 +51,8 @@ export default function Products() {
 
   const [selectedSupplierId, setSelectedSupplierId] = useState("");
 
+  const [searchQuery, setSearchQuery] = useState('');
+
 
   const [form, setForm] = useState({
     code: "",
@@ -64,6 +66,25 @@ export default function Products() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const token = localStorage.getItem("token");
+
+  //Search
+  useEffect(() => {
+  const delayDebounce = setTimeout(() => {
+    if (searchQuery.trim() === '') {
+      fetchProducts();
+      return;
+    }
+    axios
+      .get(`http://localhost:8080/warehouse/fuzzy-search?query=${encodeURIComponent(searchQuery)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setProducts(res.data))
+      .catch((err) => console.error("Fuzzy search error:", err));
+  }, 300); // debounce 300ms
+
+  return () => clearTimeout(delayDebounce);
+}, [searchQuery]);
+
 
   // Load danh sách sản phẩm
   const fetchProducts = async () => {
@@ -312,6 +333,25 @@ export default function Products() {
             ))}
           </Select>
         </FormControl>
+
+        <TextField
+  label="Tìm kiếm sản phẩm"
+  variant="outlined"
+  size="small"
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  sx={{
+    width: 300,
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': { borderColor: '#6D5F4B' },
+      '&:hover fieldset': { borderColor: '#6D5F4B' },
+      '&.Mui-focused fieldset': { borderColor: '#6D5F4B' },
+    },
+    '& label': { color: '#6D5F4B' },
+    '& input': { color: '#333' },
+  }}
+/>
+
       </Box>
 
       {loading ? (
