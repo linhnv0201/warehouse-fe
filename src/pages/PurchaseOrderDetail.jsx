@@ -17,6 +17,8 @@ export default function PurchaseOrderDetail() {
   const [loadingRO, setLoadingRO] = useState(false);
   const [openDetailDialog, setOpenDetailDialog] = useState(false);
   const [selectedReceiveOrder, setSelectedReceiveOrder] = useState(null);
+  const [currentReceiveOrderId, setCurrentReceiveOrderId] = useState(null);
+
 
   //Của tạo phiếu nhập
 const [orderDetails, setOrderDetails] = useState(null);
@@ -121,9 +123,10 @@ const [openCreateReceiveOrderDialog, setOpenCreateReceiveOrderDialog] = useState
   }
     };
 
-    const handleOpenInvoice = async (receiveOrderId) => {
-  await fetchPurchaseInvoices(receiveOrderId);
-  setOpenInvoiceDialog(true);
+  const handleOpenInvoice = async (receiveOrderId) => {
+    setCurrentReceiveOrderId(receiveOrderId); 
+    await fetchPurchaseInvoices(receiveOrderId);
+    setOpenInvoiceDialog(true);
     };
 
     const handleCloseInvoice = () => {
@@ -174,9 +177,8 @@ const handleCreateReceiveOrder = async (purchaseOrderId) => {
         purchaseOrderItemId: item.id,
         quantity: parseInt(item.quantity) || 0
       }))
-      .filter(item => item.quantity > 0); // ✅ Chỉ giữ lại các item có số lượng > 0
+      .filter(item => item.quantity > 0);
 
-    // ✅ Nếu không có mặt hàng nào được nhập
     if (itemsToReceive.length === 0) {
       alert("Vui lòng nhập số lượng cho ít nhất một mặt hàng.");
       return;
@@ -197,15 +199,20 @@ const handleCreateReceiveOrder = async (purchaseOrderId) => {
       }
     );
 
-    setOpenCreateReceiveOrderDialog(false);
-    // toast.success("Tạo phiếu nhập thành công!");
     alert("Tạo phiếu nhập thành công!");
+    setOpenCreateReceiveOrderDialog(false);
+    setShippingCost(0);
+    setReceiveQuantities([]);
+
+    // 🔄 Cập nhật danh sách phiếu nhập mới nhất
+    fetchReceiveOrders();
+
   } catch (error) {
     console.error("Lỗi khi tạo phiếu nhập:", error);
-    // toast.error("Tạo phiếu nhập thất bại!");
     alert("Tạo phiếu nhập thất bại!");
   }
 };
+
 
   // Kết thúc tạo phiếu nhập
 
@@ -232,49 +239,64 @@ const handleCreateReceiveOrder = async (purchaseOrderId) => {
     setSelectedReceiveOrder(null);
     };
 
-    //Payment
-// Khi bấm nút Tạo thanh toán:
-  const handleCreatePayment = () => {
-  if (!selectedInvoice) {
-    alert('Không có hóa đơn để thanh toán');
-    return;
-  }
 
-  const token = localStorage.getItem('token');
-  const data = {
-    amount: Number(paymentAmount), // Sử dụng số tiền người dùng nhập
-    paymentMethod,
-    note: paymentNote || `Thanh toán hóa đơn số ${selectedInvoice.code}`,
-  };
-
-  fetch(`http://localhost:8080/warehouse/payments/${selectedInvoice.id}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
-  })
-    .then(async (res) => {
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`Lỗi ${res.status}: ${errorText}`);
+    const handleCreatePayment = async () => {
+      if (!selectedInvoice) {
+        setPaymentError('Không có hóa đơn để thanh toán');
+        return;
       }
-      return res.json();
-    })
-    .then((res) => {
-      console.log('Thanh toán thành công:', res);
-      alert('Thanh toán thành công!');
-      setOpenCreatePaymentDialog(false);
-      setPaymentAmount('');
-      setPaymentNote('');
-    })
-    .catch((err) => {
-      console.error(err);
-      alert(`Tạo thanh toán thất bại: ${err.message}`);
-    });
-};
 
+      const remaining = selectedInvoice.remainingAmount || 0;
+      const amount = Number(paymentAmount);
+
+      // Kiểm tra nhập hợp lệ
+      if (!amount || amount <= 0 || amount > remaining) {
+        setPaymentError(`Số tiền phải > 0 và ≤ ${remaining.toLocaleString('vi-VN')} ₫`);
+        return;
+      }
+
+      setPaymentError(''); // Xóa lỗi nếu hợp lệ
+
+      const data = {
+        amount,
+        paymentMethod,
+        note: paymentNote || `Thanh toán hóa đơn số ${selectedInvoice.code}`,
+      };
+
+      try {
+        const res = await fetch(`http://localhost:8080/warehouse/payments/${selectedInvoice.id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(data),
+        });
+
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(`Lỗi ${res.status}: ${errorText}`);
+        }
+
+        await res.json();
+
+        alert('Thanh toán thành công!');
+        setOpenCreatePaymentDialog(false);
+        setPaymentAmount('');
+        setPaymentNote('');
+        setPaymentError('');
+
+        // 🔄 Cập nhật hóa đơn
+        if (selectedInvoice.receiveOrderId) {
+          await fetchPurchaseInvoices(selectedInvoice.receiveOrderId);
+        }
+
+        setOpenInvoiceDialog(true);
+      } catch (err) {
+        console.error(err);
+        setPaymentError(`Tạo thanh toán thất bại: ${err.message}`);
+      }
+    };
 
 
 
@@ -782,8 +804,9 @@ const handleCreateReceiveOrder = async (purchaseOrderId) => {
                     size="small"
                     sx={{ backgroundColor: '#6B4C3B', color: '#fff' }}
                     onClick={() => {
-                      setSelectedInvoice(pi);
-                      setOpenCreatePaymentDialog(true);
+                      setOpenInvoiceDialog(false); // Đóng dialog hóa đơn
+                      setSelectedInvoice({ ...pi, receiveOrderId: currentReceiveOrderId }); // Ghi nhớ hóa đơn đang thao tác
+                      setOpenCreatePaymentDialog(true); // Mở dialog thanh toán
                     }}
                     disabled={pi.status === 'PAID'}
                   >
@@ -868,24 +891,24 @@ const handleCreateReceiveOrder = async (purchaseOrderId) => {
         <Typography><strong>Mã hóa đơn:</strong> {selectedInvoice.code}</Typography>
         <Typography><strong>Tổng tiền:</strong> {selectedInvoice.totalAmount.toLocaleString('vi-VN')} ₫</Typography>
         <Typography sx={{ mb: 2 }}>
-          <strong>Còn nợ:</strong> {(selectedInvoice.re).toLocaleString('vi-VN')} ₫
+          <strong>Còn nợ:</strong> {(selectedInvoice.remainingAmount).toLocaleString('vi-VN')} ₫
         </Typography>
       </>
     )}
 
-    <TextField
+    {/* <TextField
   fullWidth
   label="Số tiền thanh toán"
   type="number"
   value={paymentAmount}
   onChange={(e) => {
     const value = Number(e.target.value);
-    const max = selectedInvoice ? selectedInvoice.totalAmount - (selectedInvoice.paidAmount || 0) : 0;
+    const max = selectedInvoice ? selectedInvoice.remainingAmount - (selectedInvoice.paidAmount || 0) : 0;
 
     if (value > max) {
       setPaymentError(`Không được vượt quá ${max.toLocaleString('vi-VN')} ₫`);
     } else {
-      setPaymentError(""); // Xóa lỗi nếu hợp lệ
+      setPaymentError(""); 
     }
 
     setPaymentAmount(value);
@@ -893,7 +916,43 @@ const handleCreateReceiveOrder = async (purchaseOrderId) => {
   margin="normal"
   error={!!paymentError}
   helperText={paymentError}
+/> */}
+<TextField
+  fullWidth
+  label="Số tiền thanh toán"
+  type="number"
+  value={paymentAmount}
+  onChange={(e) => {
+    let val = e.target.value;
+
+    // Cho phép xóa toàn bộ
+    if (val === '') {
+      setPaymentAmount('');
+      setPaymentError('');
+      return;
+    }
+
+    // Loại bỏ số 0 ở đầu nếu có nhiều chữ số
+    if (/^0\d+/.test(val)) {
+      val = val.replace(/^0+/, '');
+    }
+
+    const num = Number(val);
+    const max = selectedInvoice ? selectedInvoice.remainingAmount - (selectedInvoice.paidAmount || 0) : 0;
+
+    if (num > max) {
+      setPaymentError(`Không được vượt quá ${max.toLocaleString('vi-VN')} ₫`);
+    } else {
+      setPaymentError('');
+    }
+
+    setPaymentAmount(val);
+  }}
+  margin="normal"
+  error={!!paymentError}
+  helperText={paymentError}
 />
+
 
     <FormControl fullWidth margin="normal">
       <InputLabel>Phương thức thanh toán</InputLabel>
@@ -937,10 +996,6 @@ const handleCreateReceiveOrder = async (purchaseOrderId) => {
     </Button>
   </DialogActions>
 </Dialog>
-
-
-
     </Paper>
   );
-  
 }

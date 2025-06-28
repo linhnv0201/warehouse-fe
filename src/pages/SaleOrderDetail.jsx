@@ -26,6 +26,7 @@ export default function SaleOrderDetail() {
   const [orderDetails, setOrderDetails] = useState(null);
   const [openCreateDeliveryOrderDialog, setOpenCreateDeliveryOrderDialog] = useState(false);
   const [deliveryQuantities, setDeliveryQuantities] = useState([]);
+  const [currentDeliveryOrderId, setCurrentDeliveryOrderId] = useState(null);
 
   //Chi tiết phiếu xuất
   const [selectedDeliveryOrder, setSelectedDeliveryOrder] = useState(null);
@@ -108,32 +109,71 @@ const handleOpenCreateDeliveryOrder = async (salesOrderId) => {
   }
 };
 
+// const handleCreateDeliveryOrder = async (salesOrderId) => {
+//   const itemsToDeliver = deliveryQuantities.map(item => ({
+//     saleOrderItemId: item.id,
+//     quantity: parseInt(item.quantity, 10) || 0
+//   }));
+
+//   const deliveryOrderData = { items: itemsToDeliver };
+
+//   try {
+//     const res = await axios.post(
+//       `http://localhost:8080/warehouse/delivery-orders/${salesOrderId}`,
+//       deliveryOrderData,
+//       { headers: { Authorization: `Bearer ${token}` } }
+//     );
+
+//     const doResp = res.data.result;
+
+//     // Thêm phiếu xuất mới vào danh sách
+//     setDeliveryOrders(prev => [...prev, doResp]);
+//     setOpenCreateDeliveryOrderDialog(false);
+//     alert("Tạo phiếu xuất thành công!");
+//   } catch (error) {
+//     console.error("Lỗi tạo phiếu xuất:", error);
+//     alert("Tạo phiếu xuất thất bại.");
+//   }
+// };
 const handleCreateDeliveryOrder = async (salesOrderId) => {
-  const itemsToDeliver = deliveryQuantities.map(item => ({
-    saleOrderItemId: item.id,
-    quantity: parseInt(item.quantity, 10) || 0
-  }));
-
-  const deliveryOrderData = { items: itemsToDeliver };
-
   try {
-    const res = await axios.post(
+    const itemsToDeliver = deliveryQuantities
+      .map(item => ({
+        saleOrderItemId: item.id,
+        quantity: parseInt(item.quantity, 10) || 0
+      }))
+      .filter(item => item.quantity > 0);
+
+    if (itemsToDeliver.length === 0) {
+      alert("Vui lòng nhập số lượng cho ít nhất một sản phẩm.");
+      return;
+    }
+
+    const deliveryOrderData = {
+      items: itemsToDeliver
+    };
+
+    await axios.post(
       `http://localhost:8080/warehouse/delivery-orders/${salesOrderId}`,
       deliveryOrderData,
-      { headers: { Authorization: `Bearer ${token}` } }
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
     );
 
-    const doResp = res.data.result;
-
-    // Thêm phiếu xuất mới vào danh sách
-    setDeliveryOrders(prev => [...prev, doResp]);
-    setOpenCreateDeliveryOrderDialog(false);
     alert("Tạo phiếu xuất thành công!");
+    setOpenCreateDeliveryOrderDialog(false);
+    setDeliveryQuantities([]);
+
+    // 🔄 Cập nhật danh sách phiếu xuất
+    fetchDO();
+
   } catch (error) {
-    console.error("Lỗi tạo phiếu xuất:", error);
-    alert("Tạo phiếu xuất thất bại.");
+    console.error("Lỗi khi tạo phiếu xuất:", error.response?.data || error);
+    alert("Tạo phiếu xuất thất bại!");
   }
 };
+
 
 //Kết thúc xử lý tạo phiếu xuất
 
@@ -186,10 +226,38 @@ const fetchSaleInvoice = async (deliveryOrderId) => {
   }
 };
 
+// const handleOpenInvoice = async (deliveryOrderId) => {
+//   setCurrentDeliveryOrderId(deliveryOrderId);
+//   await fetchSaleInvoice(deliveryOrderId);
+//   setSelectedInvoice({ ...saleInvoice, deliveryOrderId });
+//   setOpenInvoiceDialog(true);
+// };
 const handleOpenInvoice = async (deliveryOrderId) => {
-  await fetchSaleInvoice(deliveryOrderId);
-  setOpenInvoiceDialog(true);
+  setCurrentDeliveryOrderId(deliveryOrderId);
+  try {
+    const res = await axios.get(
+      `http://localhost:8080/warehouse/sale-invoices/by-delivery-order/${deliveryOrderId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    if (res.data.code === 0 && res.data.result) {
+      const invoice = res.data.result;
+      setSaleInvoice(invoice);
+      setSelectedInvoice({ ...invoice, deliveryOrderId });
+    } else {
+      setSaleInvoice(null);
+      setSelectedInvoice(null);
+      alert("Không có hóa đơn bán cho phiếu xuất này.");
+    }
+  } catch (error) {
+    setSaleInvoice(null);
+    setSelectedInvoice(null);
+    alert("Lỗi khi lấy hóa đơn bán.");
+  } finally {
+    setOpenInvoiceDialog(true);
+  }
 };
+
 
 const handleCloseInvoice = () => {
   setOpenInvoiceDialog(false);
@@ -209,6 +277,7 @@ const handleOpenPayments = () => {
   setPaymentError('');
   setOpenCreatePaymentDialog(true);
 };
+
 const handleCreatePayment = async () => {
   if (!selectedInvoice) return;
 
@@ -221,20 +290,38 @@ const handleCreatePayment = async () => {
   try {
     const res = await axios.post(
       `http://localhost:8080/warehouse/sale-invoice-payments/${selectedInvoice.id}`,
-      { amount: paymentAmount, paymentMethod, note: paymentNote },
-      { headers: { Authorization: `Bearer ${token}` } }
+      {
+        amount: paymentAmount,
+        paymentMethod,
+        note: paymentNote || `Thanh toán hóa đơn ${selectedInvoice.code}`
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
     );
 
-    // Nếu backend trả về code 0, coi là thành công
     if (res.data.code === 0) {
       alert('Thanh toán thành công!');
+
+      // Reset form
+      setPaymentAmount('');
+      setPaymentNote('');
+      setPaymentError('');
       setOpenCreatePaymentDialog(false);
 
-      // Cập nhật lại saleInvoice (hiển thị số còn nợ)
-      await fetchSaleInvoice(selectedInvoice.deliveryOrderId); 
-
-      // (Tùy chọn) Cập nhật luôn list payments cho dialog
-      await fetchPaymentsByInvoice(selectedInvoice.id);
+      // 🔄 Gọi lại hóa đơn mới và mở lại dialog hóa đơn
+      if (currentDeliveryOrderId) {
+        const invoiceRes = await axios.get(
+          `http://localhost:8080/warehouse/sale-invoices/by-delivery-order/${currentDeliveryOrderId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (invoiceRes.data.code === 0 && invoiceRes.data.result) {
+          const updatedInvoice = invoiceRes.data.result;
+          setSaleInvoice(updatedInvoice);
+          setSelectedInvoice({ ...updatedInvoice, deliveryOrderId: currentDeliveryOrderId });
+          setOpenInvoiceDialog(true); // ✅ Mở lại dialog hóa đơn
+        }
+      }
     } else {
       alert(`Thanh toán thất bại: ${res.data.message || 'Không xác định'}`);
     }
@@ -244,6 +331,7 @@ const handleCreatePayment = async () => {
     alert(`Thanh toán thất bại: ${msg}`);
   }
 };
+
 
 
 //Kết thúc thanh toán
@@ -265,15 +353,40 @@ const fetchPaymentsByInvoice = async (invoiceId) => {
     setLoadingPayments(false);
   }
 };
+
+
+// const handleOpenPaymentsDialogSO = async (deliveryOrderId) => {
+//   await fetchSaleInvoice(deliveryOrderId);
+//   if (!saleInvoice?.id) {
+//     alert('Chưa có hóa đơn bán cho phiếu xuất này.');
+//     return;
+//   }
+//   setSelectedInvoice({ ...saleInvoice, deliveryOrderId });
+//   await fetchPaymentsByInvoice(saleInvoice.id);
+//   setOpenPaymentsDialog(true);
+// };
 const handleOpenPaymentsDialogSO = async (deliveryOrderId) => {
-  await fetchSaleInvoice(deliveryOrderId);
-  if (!saleInvoice?.id) {
-    alert('Chưa có hóa đơn bán cho phiếu xuất này.');
-    return;
+  try {
+    const res = await axios.get(
+      `http://localhost:8080/warehouse/sale-invoices/by-delivery-order/${deliveryOrderId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    if (res.data.code === 0 && res.data.result) {
+      const invoice = res.data.result;
+      setSelectedInvoice({ ...invoice, deliveryOrderId });
+      await fetchPaymentsByInvoice(invoice.id);  // Gọi theo ID mới cập nhật
+      setOpenPaymentsDialog(true);
+    } else {
+      alert('Chưa có hóa đơn bán cho phiếu xuất này.');
+    }
+  } catch (error) {
+    console.error(error);
+    alert('Lỗi khi lấy hóa đơn bán.');
   }
-  await fetchPaymentsByInvoice(saleInvoice.id);
-  setOpenPaymentsDialog(true);
 };
+
+
 
 
 
@@ -372,7 +485,7 @@ const handleOpenPaymentsDialogSO = async (deliveryOrderId) => {
                 const vat = it.taxRate || 0;
                 const price = it.saleUnitPrice || 0;
                 const qty = it.quantity || 0;
-                const remaining = it.remainingQuantity ?? qty; // fallback nếu chưa có
+                const remaining = it.remainingQuantity ?? qty; 
                 const total = qty * price * (1 + vat / 100);
 
                 return (
@@ -382,7 +495,7 @@ const handleOpenPaymentsDialogSO = async (deliveryOrderId) => {
                     <TableCell>{it.productName}</TableCell>
                     <TableCell>{unit}</TableCell>
                     <TableCell align="right">{qty}</TableCell>
-                    <TableCell align="right">{remaining}</TableCell> {/* 👈 mới thêm */}            
+                    <TableCell align="right">{remaining}</TableCell>      
                     <TableCell align="right">{price.toLocaleString()} ₫</TableCell>
                     <TableCell align="right">{vat} %</TableCell>
                     <TableCell align="right">{total.toLocaleString()} ₫</TableCell>
@@ -600,7 +713,6 @@ const handleOpenPaymentsDialogSO = async (deliveryOrderId) => {
   <DialogTitle sx={{ backgroundColor: '#6B4C3B', color: '#fff' }}>
     Hóa đơn bán
   </DialogTitle>
-
   <DialogContent sx={{ backgroundColor: '#E6D4C3', paddingBottom: 2 }}>
     {loadingSaleInvoice ? (
       <CircularProgress sx={{ color: '#A67C52' }} />
@@ -643,15 +755,20 @@ const handleOpenPaymentsDialogSO = async (deliveryOrderId) => {
               </TableCell>              
               <TableCell>{saleInvoice.status}</TableCell>
               <TableCell>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    sx={{ backgroundColor: '#6B4C3B', color: '#fff' }}
-                    onClick={() => { setSelectedInvoice(saleInvoice); handleOpenPayments(); }}
-                    disabled={saleInvoice.status === 'PAID'}
-                  >
-                    Thanh toán
-                  </Button>
+              `  <Button
+                  variant="contained"
+                  size="small"
+                  sx={{ backgroundColor: '#6B4C3B', color: '#fff' }}
+                  onClick={() => {
+                    setOpenInvoiceDialog(false); // đóng trước
+                    setSelectedInvoice({ ...saleInvoice, deliveryOrderId: currentDeliveryOrderId });
+                    setOpenCreatePaymentDialog(true); // mở dialog thanh toán
+                  }}
+                  disabled={saleInvoice.status === 'PAID'}
+                >
+                  Thanh toán
+                </Button>`
+
               </TableCell>              
             </TableRow>
           </TableBody>
@@ -678,7 +795,7 @@ const handleOpenPaymentsDialogSO = async (deliveryOrderId) => {
         <Typography><strong>Còn nợ:</strong> {(selectedInvoice.remainingAmount).toLocaleString('vi-VN')} ₫</Typography>
       </>
     )}
-    <TextField
+    {/* <TextField
       fullWidth
       label="Số tiền thanh toán"
       type="number"
@@ -692,14 +809,53 @@ const handleOpenPaymentsDialogSO = async (deliveryOrderId) => {
       error={!!paymentError}
       helperText={paymentError}
       margin="normal"
-    />
+    /> */}
+    <TextField
+  fullWidth
+  label="Số tiền thanh toán"
+  type="number"
+  value={paymentAmount}
+  onChange={e => {
+    let val = e.target.value;
+
+    // Cho phép xóa toàn bộ
+    if (val === '') {
+      setPaymentAmount('');
+      setPaymentError('');
+      return;
+    }
+
+    // Bỏ số 0 ở đầu nếu có nhiều chữ số
+    if (/^0\d+/.test(val)) {
+      val = val.replace(/^0+/, '');
+    }
+
+    const num = Number(val);
+    const max = selectedInvoice?.remainingAmount || 0;
+
+    setPaymentError(num > max ? `Không vượt quá ${max.toLocaleString('vi-VN')} ₫` : '');
+    setPaymentAmount(val);
+  }}
+  error={!!paymentError}
+  helperText={paymentError}
+  margin="normal"
+/>
+
+
     <FormControl fullWidth margin="normal">
-      <InputLabel>Phương thức</InputLabel>
-      <Select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}>
+      <InputLabel id="payment-method-label">Phương thức thanh toán</InputLabel>
+      <Select
+        labelId="payment-method-label"
+        id="payment-method"
+        value={paymentMethod}
+        onChange={e => setPaymentMethod(e.target.value)}
+        label="Phương thức"
+      >
         <MenuItem value="CASH">Tiền mặt</MenuItem>
         <MenuItem value="BANK_TRANSFER">Chuyển khoản</MenuItem>
       </Select>
     </FormControl>
+
     <TextField
       fullWidth label="Ghi chú"
       value={paymentNote}

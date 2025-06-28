@@ -265,24 +265,44 @@ useEffect(() => {
                 onChange={(e) => handleItemChange(index, "productId", e.target.value)}
                 disabled={loadingCreate}
               >
-                <MenuItem value=""><em>Chọn sản phẩm</em></MenuItem>
-                {products.map((p) => (
-                  <MenuItem key={p.id} value={p.id}>
-                  {`${p.code} - ${p.name} - Giá mua ${p.unitPrice.toLocaleString()}₫`}
+              <MenuItem value=""><em>Chọn sản phẩm</em></MenuItem>
+              {products.map((p) => {
+                const isSelectedElsewhere = items.some((it, idx) => idx !== index && it.productId === p.id);
+                return (
+                  <MenuItem
+                    key={p.id}
+                    value={p.id}
+                    disabled={isSelectedElsewhere}
+                    sx={isSelectedElsewhere ? { color: 'gray' } : {}}
+                  >
+                    {`${p.code} - ${p.name} - Giá mua ${p.unitPrice.toLocaleString()}₫`}
                   </MenuItem>
-                ))}
+                );
+              })}
               </Select>
             </FormControl>     
 
-              <TextField
-                label="Số lượng"
-                type="number"
-                inputProps={{ min: 1 }}
-                value={item.quantity}
-                onChange={(e) => handleItemChange(index, "quantity", e.target.value)}
-                sx={{ width: 100 }}
-                disabled={loadingCreate}
-              />
+            <TextField
+              label="Số lượng"
+              type="text"
+              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+              value={item.quantity}
+              onChange={(e) => {
+                const raw = e.target.value;
+
+                if (raw === '') {
+                  handleItemChange(index, 'quantity', '');
+                } else if (/^\d+$/.test(raw)) {
+                  const cleaned = raw.replace(/^0+/, '') || '0';
+                  if (parseInt(cleaned, 10) <= 9999999) {
+                    handleItemChange(index, 'quantity', cleaned);
+                  }
+                }
+              }}
+              sx={{ width: 100 }}
+              disabled={loadingCreate}
+            />
+
 
               {items.length > 1 && (
                 <IconButton

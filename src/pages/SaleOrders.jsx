@@ -165,27 +165,51 @@ const handleSubmit = async () => {
 
 
   const handleAddItem = () =>
-    setItems((prev) => [...prev, { inventoryId: "", quantity: 1, saleUnitPrice: 0 }]);
+    setItems((prev) => [...prev, { inventoryId: "", quantity: 0, saleUnitPrice: 0 }]);
 
   const handleRemoveItem = (index) =>
     setItems((prev) => prev.filter((_, i) => i !== index));
 
   const handleItemChange = (index, field, value) => {
     setItems((prev) =>
-      prev.map((item, i) =>
-        i === index
-          ? {
-              ...item,
-              [field]:
-                field === "quantity" || field === "saleUnitPrice"
-                  ? Number(value)
-                  : value,
-            }
-          : item
-      )
+      prev.map((item, i) => {
+        if (i !== index) return item;
+
+        if (field === "inventoryId") {
+          const selectedProduct = products.find(p => p.id === value);
+          return {
+            ...item,
+            inventoryId: value,
+            quantityAvailable: selectedProduct?.quantityAvailable || 0,
+            quantity: 1
+          };
+        }
+
+        let newValue = value;
+
+        if (field === "quantity") {
+          let quantity = parseInt(value, 10);
+          if (isNaN(quantity) || quantity < 1) quantity = 0;
+          if (item.quantityAvailable && quantity > item.quantityAvailable)
+            quantity = item.quantityAvailable;
+          newValue = quantity;
+        }
+
+        if (field === "saleUnitPrice") {
+          let price = parseFloat(value);
+          if (isNaN(price) || price < 0) price = 0;
+          newValue = price;
+        }
+
+        return {
+          ...item,
+          [field]: newValue,
+        };
+      })
     );
   };
-// Đã cắt ngắn phần đầu để tập trung vào style
+
+
 // Giữ nguyên toàn bộ logic
 
 // === RENDER CREATE ===
@@ -275,15 +299,26 @@ if (view === "create") {
                 }}
               >
                 <MenuItem value=""><em>Chọn sản phẩm</em></MenuItem>
-                {products.map((p) => (
-                  <MenuItem key={p.id} value={p.id}>
-                    {`${p.productCode} - ${p.productName} (Còn: ${p.quantityAvailable}) - Giá mua: ${p.unitPrice.toLocaleString()}đ`}
-                  </MenuItem>
-                ))}
+                {products.map((p) => {
+                  const isSelectedElsewhere = items.some((it, idx) => idx !== index && it.inventoryId === p.id);
+                  const isDisabled = p.quantityAvailable <= 0 || isSelectedElsewhere;
+
+                  return (
+                    <MenuItem
+                      key={p.id}
+                      value={p.id}
+                      disabled={isDisabled}
+                      sx={isDisabled ? { color: "gray" } : {}}
+                    >
+                      {`${p.productCode} - ${p.productName} (Còn: ${p.quantityAvailable}) - Giá mua: ${p.unitPrice.toLocaleString()}đ`}
+                    </MenuItem>
+                  );
+                })}
+
               </Select>
             </FormControl>
 
-            <TextField
+            {/* <TextField
               label="Số lượng"
               type="number"
               inputProps={{ min: 1 }}
@@ -301,7 +336,50 @@ if (view === "create") {
               onChange={(e) => handleItemChange(index, "saleUnitPrice", e.target.value)}
               sx={{ width: 140 }}
               disabled={loadingCreate}
-            />
+            /> */}
+<TextField
+  label="Số lượng"
+  type="text"
+  inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+  value={item.quantity}
+  onChange={(e) => {
+    const raw = e.target.value;
+
+    if (raw === '') {
+      handleItemChange(index, 'quantity', '');
+    } else if (/^\d+$/.test(raw)) {
+      const cleaned = raw.replace(/^0+/, '') || '0';
+      if (parseInt(cleaned, 10) <= 9999999) {
+        handleItemChange(index, 'quantity', cleaned);
+      }
+    }
+  }}
+  sx={{ width: 100 }}
+  disabled={loadingCreate}
+/>
+
+
+
+<TextField
+  label="Đơn giá bán"
+  type="text"
+  inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+  value={item.saleUnitPrice}
+  onChange={(e) => {
+    const raw = e.target.value;
+
+    if (raw === '' || /^\d+$/.test(raw)) {
+      const cleaned = raw.replace(/^0+/, '') || '0';
+      if (cleaned === '' || parseInt(cleaned, 10) <= 999999999) {
+        handleItemChange(index, 'saleUnitPrice', raw); // 👈 dùng raw
+      }
+    }
+  }}
+  sx={{ width: 140 }}
+  disabled={loadingCreate}
+/>
+
+
 
             {items.length > 1 && (
               <IconButton
@@ -400,6 +478,7 @@ return (
               <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Tên đơn hàng</TableCell>
               <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Khách hàng</TableCell>
               <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Trạng thái</TableCell>
+              <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Ngày tạo</TableCell>
               <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Hành động</TableCell>
             </TableRow>
           </TableHead>
@@ -410,6 +489,9 @@ return (
                 <TableCell>{order.saleName}</TableCell>
                 <TableCell>{order.customerName}</TableCell>
                 <TableCell>{order.status}</TableCell>
+                <TableCell>
+                  {new Date(order.createdAt).toLocaleDateString("vi-VN")}
+                </TableCell>                
                 <TableCell>
                   <Link to={`/dashboard/sale-orders/${order.id}`} style={{ color: "#6D5F4B" }}>
                     Xem chi tiết
