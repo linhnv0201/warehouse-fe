@@ -136,7 +136,23 @@ export default function Statistics() {
         <Tab label="Bán chạy" />
       </Tabs>
 
-      <Typography variant="h5" sx={{ color: "#6D5F4B", mb: 2 }}>{title}</Typography>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+        <Typography variant="h5" sx={{ color: "#6D5F4B" }}>{title}</Typography>
+        {tab !== 3 && (
+          <FormControl size="small" sx={{ minWidth: 160 }}>
+            <InputLabel>Khoảng thời gian</InputLabel>
+            <Select
+              value={filterDays}
+              label="Khoảng thời gian"
+              onChange={e => setFilterDays(e.target.value)}
+            >
+              {FILTERS.map(f => (
+                <MenuItem key={f.value} value={f.value}>{f.label}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+      </Box>
 
       {tab === 3 ? (
         loading ? <CircularProgress sx={{ color: "#6D5F4B" }} /> : (
