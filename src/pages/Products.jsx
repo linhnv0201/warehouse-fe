@@ -69,21 +69,21 @@ export default function Products() {
 
   //Search
   useEffect(() => {
-  const delayDebounce = setTimeout(() => {
-    if (searchQuery.trim() === '') {
-      fetchProducts();
-      return;
-    }
-    axios
-      .get(`http://localhost:8080/warehouse/fuzzy-search?query=${encodeURIComponent(searchQuery)}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setProducts(res.data))
-      .catch((err) => console.error("Fuzzy search error:", err));
-  }, 300); // debounce 300ms
+    const delayDebounce = setTimeout(() => {
+      if (searchQuery.trim() === '') {
+        fetchProducts();
+        return;
+      }
+      axios
+        .get(`http://localhost:8080/warehouse/fuzzy-search?query=${encodeURIComponent(searchQuery)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => setProducts(res.data))
+        .catch((err) => console.error("Fuzzy search error:", err));
+    }, 300); // debounce 300ms
 
-  return () => clearTimeout(delayDebounce);
-}, [searchQuery]);
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
 
 
   // Load danh sách sản phẩm
@@ -113,20 +113,20 @@ export default function Products() {
   };
 
   const handleFilterBySupplier = async (supplierId) => {
-  setSelectedSupplierId(supplierId);
-  if (!supplierId) {
-    fetchProducts(); // Nếu bỏ lọc
-    return;
-  }
-  try {
-    const res = await axios.get(`http://localhost:8080/warehouse/products/supplier/${supplierId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setProducts(res.data.result);
-  } catch (error) {
-    console.error("Lỗi lọc sản phẩm theo nhà cung cấp:", error);
-  }
-};
+    setSelectedSupplierId(supplierId);
+    if (!supplierId) {
+      fetchProducts(); // Nếu bỏ lọc
+      return;
+    }
+    try {
+      const res = await axios.get(`http://localhost:8080/warehouse/products/supplier/${supplierId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProducts(res.data.result);
+    } catch (error) {
+      console.error("Lỗi lọc sản phẩm theo nhà cung cấp:", error);
+    }
+  };
 
 
   useEffect(() => {
@@ -335,22 +335,22 @@ export default function Products() {
         </FormControl>
 
         <TextField
-  label="Tìm kiếm sản phẩm"
-  variant="outlined"
-  size="small"
-  value={searchQuery}
-  onChange={(e) => setSearchQuery(e.target.value)}
-  sx={{
-    width: 300,
-    '& .MuiOutlinedInput-root': {
-      '& fieldset': { borderColor: '#6D5F4B' },
-      '&:hover fieldset': { borderColor: '#6D5F4B' },
-      '&.Mui-focused fieldset': { borderColor: '#6D5F4B' },
-    },
-    '& label': { color: '#6D5F4B' },
-    '& input': { color: '#333' },
-  }}
-/>
+          label="Tìm kiếm sản phẩm"
+          variant="outlined"
+          size="small"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{
+            width: 300,
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': { borderColor: '#6D5F4B' },
+              '&:hover fieldset': { borderColor: '#6D5F4B' },
+              '&.Mui-focused fieldset': { borderColor: '#6D5F4B' },
+            },
+            '& label': { color: '#6D5F4B' },
+            '& input': { color: '#333' },
+          }}
+        />
 
       </Box>
 
@@ -364,7 +364,7 @@ export default function Products() {
             <TableHead>
               <TableRow sx={{ bgcolor: "#E9E4D4" }}>
                 <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Mã SP</TableCell>
-                <TableCell sx={{ color: "#6D5F4B",fontWeight: "bold" }}>Tên SP</TableCell>
+                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Tên SP</TableCell>
                 <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Mô tả</TableCell>
                 <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Đơn vị</TableCell>
                 <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Giá</TableCell>

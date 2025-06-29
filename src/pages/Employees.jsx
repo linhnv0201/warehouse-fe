@@ -160,14 +160,14 @@ export default function Employees() {
         role: form.role,
       };
 
-        // Chỉ thêm password nếu người dùng nhập
-        if (form.password?.trim()) {
-          updateData.password = form.password;
-        }
+      // Chỉ thêm password nếu người dùng nhập
+      if (form.password?.trim()) {
+        updateData.password = form.password;
+      }
 
-        await axios.put(`http://localhost:8080/warehouse/users/${currentEdit.id}`, updateData, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+      await axios.put(`http://localhost:8080/warehouse/users/${currentEdit.id}`, updateData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
 
       fetchEmployees();

@@ -16,32 +16,32 @@ export default function Login() {
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setErrorMsg('');
-  try {
-    const res = await axios.post('http://localhost:8080/warehouse/auth/token', {
-      email,
-      password,
-    });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    try {
+      const res = await axios.post('http://localhost:8080/warehouse/auth/token', {
+        email,
+        password,
+      });
 
-    if (res.data.code === 0 && res.data.result?.authenticated) {
-      localStorage.setItem('token', res.data.result.token);
-      navigate('/dashboard');
-    } else {
-      setErrorMsg('Sai thông tin đăng nhập');
-      setTimeout(() => setErrorMsg(''), 5000);
+      if (res.data.code === 0 && res.data.result?.authenticated) {
+        localStorage.setItem('token', res.data.result.token);
+        navigate('/dashboard');
+      } else {
+        setErrorMsg('Sai thông tin đăng nhập');
+        setTimeout(() => setErrorMsg(''), 5000);
+      }
+    } catch (err) {
+      if (err.response) {
+        setErrorMsg('Sai thông tin đăng nhập');
+        setTimeout(() => setErrorMsg(''), 5000);
+      } else {
+        setErrorMsg('Lỗi kết nối server');
+        setTimeout(() => setErrorMsg(''), 5000);
+      }
     }
-  } catch (err) {
-    if (err.response) {
-      setErrorMsg('Sai thông tin đăng nhập');
-      setTimeout(() => setErrorMsg(''), 5000);
-    } else {    
-      setErrorMsg('Lỗi kết nối server');
-      setTimeout(() => setErrorMsg(''), 5000);  
-    }
-  }
-};
+  };
 
 
   return (

@@ -31,7 +31,7 @@ export default function PurchaseOrders() {
   const navigate = useNavigate();
   const [view, setView] = useState("list"); // 'list' | 'create'
 
-  
+
 
   // COMMON
   const token = localStorage.getItem("token");
@@ -57,23 +57,23 @@ export default function PurchaseOrders() {
 
   // Fetch đơn hàng (list)
   const fetchOrders = async () => {
-  setLoadingOrders(true);
-  try {
-    const res = await axios.get(
-      `http://localhost:8080/warehouse/purchase-orders?status=${filterStatus}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    setOrders(res.data.result || []);
-  } catch (error) {
-    console.error("Lỗi tải đơn hàng:", error);
-  }
-  setLoadingOrders(false);
-};
+    setLoadingOrders(true);
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/warehouse/purchase-orders?status=${filterStatus}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setOrders(res.data.result || []);
+    } catch (error) {
+      console.error("Lỗi tải đơn hàng:", error);
+    }
+    setLoadingOrders(false);
+  };
 
-// Trong useEffect khi lọc thay đổi
-useEffect(() => {
-  if (view === "list") fetchOrders();
-}, [filterStatus, view]);
+  // Trong useEffect khi lọc thay đổi
+  useEffect(() => {
+    if (view === "list") fetchOrders();
+  }, [filterStatus, view]);
 
 
   // Lấy kho & nhà cung cấp (create)
@@ -188,121 +188,130 @@ useEffect(() => {
   };
 
   // === RENDER ===
-  if (view === "create") {
-    // Màn tạo đơn hàng mới
-    return (
-      <Box sx={{ p: 3, bgcolor: "#F5F1E9", minHeight: "100vh", maxWidth: 700, mx: "auto" }}>
-        <Typography variant="h5" sx={{ mb: 3, color: "#6D5F4B" }}>
-          Tạo đơn hàng mua mới
-        </Typography>
+if (view === "create") {
+  const calculateLineTotal = (item) => {
+    const product = products.find((p) => p.id === item.productId);
+    const qty = Number(item.quantity);
+    if (product && !isNaN(qty)) {
+      return product.unitPrice * qty * (1 + (product.taxRate || 0) / 100);
+    }
+    return 0;
+  };
 
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <TextField
-            label="Tên đơn hàng"
-            value={orderName}
-            onChange={(e) => setOrderName(e.target.value)}
-            disabled={loadingCreate}
-          />
-        </FormControl>
+  const totalAmount = items.reduce((sum, item) => sum + calculateLineTotal(item), 0);
 
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel id="supplier-label">Nhà cung cấp</InputLabel>
-          <Select
-            labelId="supplier-label"
-            value={selectedSupplier}
-            label="Nhà cung cấp"
-            onChange={(e) => setSelectedSupplier(e.target.value)}
-            disabled={loadingCreate}
-          >
-            <MenuItem value="">
-              <em>Chọn nhà cung cấp</em>
-            </MenuItem>
-            {suppliers.map((sup) => (
-              <MenuItem key={sup.id} value={sup.id}>
-                {sup.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+  return (
+    <Box sx={{ p: 3, bgcolor: "#F5F1E9", minHeight: "100vh", maxWidth: 700, mx: "auto" }}>
+      <Typography variant="h5" sx={{ mb: 3, color: "#6D5F4B" }}>
+        Tạo đơn hàng mua mới
+      </Typography>
 
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel id="warehouse-label">Kho hàng</InputLabel>
-          <Select
-            labelId="warehouse-label"
-            value={selectedWarehouse}
-            label="Kho hàng"
-            onChange={(e) => setSelectedWarehouse(e.target.value)}
-            disabled={loadingCreate}
-          >
-            <MenuItem value="">
-              <em>Chọn kho hàng</em>
-            </MenuItem>
-            {warehouses.map((wh) => (
-              <MenuItem key={wh.id} value={wh.id}>
-                {wh.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <TextField
+          label="Tên đơn hàng"
+          value={orderName}
+          onChange={(e) => setOrderName(e.target.value)}
+          disabled={loadingCreate}
+        />
+      </FormControl>
 
-        <Typography variant="h6" sx={{ mt: 3, mb: 1, color: "#6D5F4B" }}>
-          Danh sách sản phẩm
-        </Typography>
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <InputLabel id="supplier-label">Nhà cung cấp</InputLabel>
+        <Select
+          labelId="supplier-label"
+          value={selectedSupplier}
+          label="Nhà cung cấp"
+          onChange={(e) => setSelectedSupplier(e.target.value)}
+          disabled={loadingCreate}
+        >
+          <MenuItem value=""><em>Chọn nhà cung cấp</em></MenuItem>
+          {suppliers.map((sup) => (
+            <MenuItem key={sup.id} value={sup.id}>{sup.name}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
 
-        {loadingProducts ? (
-          <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-            <CircularProgress sx={{ color: "#6D5F4B" }} />
-          </Box>
-        ) : (
-          items.map((item, index) => (
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <InputLabel id="warehouse-label">Kho hàng</InputLabel>
+        <Select
+          labelId="warehouse-label"
+          value={selectedWarehouse}
+          label="Kho hàng"
+          onChange={(e) => setSelectedWarehouse(e.target.value)}
+          disabled={loadingCreate}
+        >
+          <MenuItem value=""><em>Chọn kho hàng</em></MenuItem>
+          {warehouses.map((wh) => (
+            <MenuItem key={wh.id} value={wh.id}>{wh.name}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      <Typography variant="h6" sx={{ mt: 3, mb: 1, color: "#6D5F4B" }}>
+        Danh sách sản phẩm
+      </Typography>
+
+      {loadingProducts ? (
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+          <CircularProgress sx={{ color: "#6D5F4B" }} />
+        </Box>
+      ) : (
+        items.map((item, index) => {
+          const product = products.find(p => p.id === item.productId);
+          const qty = Number(item.quantity);
+          const total = calculateLineTotal(item);
+
+          return (
             <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }} key={index}>
-            <FormControl sx={{ flex: 1 }}>
-              <InputLabel id={`product-label-${index}`}>Sản phẩm</InputLabel>
-              <Select
-                labelId={`product-label-${index}`}
-                value={item.productId}
-                label="Sản phẩm"
-                onChange={(e) => handleItemChange(index, "productId", e.target.value)}
-                disabled={loadingCreate}
-              >
-              <MenuItem value=""><em>Chọn sản phẩm</em></MenuItem>
-              {products.map((p) => {
-                const isSelectedElsewhere = items.some((it, idx) => idx !== index && it.productId === p.id);
-                return (
-                  <MenuItem
-                    key={p.id}
-                    value={p.id}
-                    disabled={isSelectedElsewhere}
-                    sx={isSelectedElsewhere ? { color: 'gray' } : {}}
-                  >
-                    {`${p.code} - ${p.name} - Giá mua ${p.unitPrice.toLocaleString()}₫`}
-                  </MenuItem>
-                );
-              })}
-              </Select>
-            </FormControl>     
+              <FormControl sx={{ flex: 1 }}>
+                <InputLabel id={`product-label-${index}`}>Sản phẩm</InputLabel>
+                <Select
+                  labelId={`product-label-${index}`}
+                  value={item.productId}
+                  label="Sản phẩm"
+                  onChange={(e) => handleItemChange(index, "productId", e.target.value)}
+                  disabled={loadingCreate}
+                >
+                  <MenuItem value=""><em>Chọn sản phẩm</em></MenuItem>
+                  {products.map((p) => {
+                    const isSelectedElsewhere = items.some((it, idx) => idx !== index && it.productId === p.id);
+                    return (
+                      <MenuItem
+                        key={p.id}
+                        value={p.id}
+                        disabled={isSelectedElsewhere}
+                        sx={isSelectedElsewhere ? { color: 'gray' } : {}}
+                      >
+                        {`${p.code} - ${p.name} - Giá mua ${p.unitPrice.toLocaleString()}₫`}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
 
-            <TextField
-              label="Số lượng"
-              type="text"
-              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-              value={item.quantity}
-              onChange={(e) => {
-                const raw = e.target.value;
-
-                if (raw === '') {
-                  handleItemChange(index, 'quantity', '');
-                } else if (/^\d+$/.test(raw)) {
-                  const cleaned = raw.replace(/^0+/, '') || '0';
-                  if (parseInt(cleaned, 10) <= 9999999) {
-                    handleItemChange(index, 'quantity', cleaned);
+              <TextField
+                label="Số lượng"
+                type="text"
+                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                value={item.quantity}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  if (raw === '') {
+                    handleItemChange(index, 'quantity', '');
+                  } else if (/^\d+$/.test(raw)) {
+                    const cleaned = raw.replace(/^0+/, '') || '0';
+                    if (parseInt(cleaned, 10) <= 9999999) {
+                      handleItemChange(index, 'quantity', cleaned);
+                    }
                   }
-                }
-              }}
-              sx={{ width: 100 }}
-              disabled={loadingCreate}
-            />
+                }}
+                sx={{ width: 100 }}
+                disabled={loadingCreate}
+              />
 
+              <Typography sx={{ color: '#5D4037', minWidth: 150, textAlign: 'right' }}>
+                Tổng: {product && !isNaN(qty) ? total.toLocaleString('vi-VN') + ' ₫' : '---'}
+              </Typography>
 
               {items.length > 1 && (
                 <IconButton
@@ -315,35 +324,45 @@ useEffect(() => {
                 </IconButton>
               )}
             </Stack>
-          ))
-        )}
+          );
+        })
+      )}
 
-        <Button
-          startIcon={<AddCircleOutlineIcon />}
-          onClick={handleAddItem}
-          disabled={loadingCreate || loadingProducts || !selectedSupplier}
-          sx={{ mb: 3 }}
-        >
-          Thêm sản phẩm
-        </Button>
+      <Button
+        startIcon={<AddCircleOutlineIcon />}
+        onClick={handleAddItem}
+        disabled={loadingCreate || loadingProducts || !selectedSupplier}
+        sx={{ mb: 3 }}
+      >
+        Thêm sản phẩm
+      </Button>
 
-        <Box>
-          <Button
-            variant="contained"
-            onClick={handleSubmit}
-            disabled={loadingCreate}
-            sx={{ mr: 2, bgcolor: "#6D5F4B" }}
-          >
-            {loadingCreate ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Tạo đơn hàng"}
-          </Button>
+      {/* Hiển thị tổng tiền ở đây */}
+      <Typography variant="h6" align="left" sx={{ color: '#5D4037', mb: 2 }}>
+        <strong>Tổng tiền (sau VAT):</strong> {totalAmount.toLocaleString('vi-VN')} ₫
+      </Typography>
 
-          <Button variant="outlined" onClick={() => setView("list")} disabled={loadingCreate}>
-            Hủy
-          </Button>
-        </Box>
-      </Box>
-    );
-  }
+<Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2 }}>
+  <Button
+    variant="contained"
+    onClick={handleSubmit}
+    disabled={loadingCreate}
+    sx={{ bgcolor: "#6D5F4B" }}
+  >
+    {loadingCreate
+      ? <CircularProgress size={24} sx={{ color: "white" }} />
+      : "Tạo đơn hàng"}
+  </Button>
+
+  <Button variant="outlined" onClick={() => setView("list")} disabled={loadingCreate}>
+    Hủy
+  </Button>
+</Box>
+
+    </Box>
+  );
+}
+
 
   // === Màn danh sách đơn hàng (list) ===
   return (
@@ -362,39 +381,39 @@ useEffect(() => {
           Tạo đơn hàng mới
         </Button>
 
-<FormControl
-  size="small"
-  sx={{
-    minWidth: 160,
-    "& .MuiOutlinedInput-root": {
-      "& fieldset": {
-        borderColor: "#6D5F4B", // viền bình thường
-      },
-      "&:hover fieldset": {
-        borderColor: "#6D5F4B", // viền khi hover
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: "#6D5F4B", // viền khi focus
-      },
-    },
-  }}
->
-<InputLabel id="filter-status-label">Lọc theo trạng thái</InputLabel>
-    <Select
-      labelId="filter-status-label"
-      value={filterStatus}
-      label="Lọc theo trạng thái"
-      onChange={(e) => setFilterStatus(e.target.value)}
-    >
-      <MenuItem value="ALL">Tất cả đơn</MenuItem>
-      <MenuItem value="PENDING">Đang chờ</MenuItem>
-      <MenuItem value="APPROVED">Đã duyệt</MenuItem>
-      <MenuItem value="CANCELLED">Đã hủy</MenuItem>
-      <MenuItem value="COMPLETED">Hoàn thành</MenuItem>
-    </Select>
+        <FormControl
+          size="small"
+          sx={{
+            minWidth: 160,
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": {
+                borderColor: "#6D5F4B", // viền bình thường
+              },
+              "&:hover fieldset": {
+                borderColor: "#6D5F4B", // viền khi hover
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#6D5F4B", // viền khi focus
+              },
+            },
+          }}
+        >
+          <InputLabel id="filter-status-label">Lọc theo trạng thái</InputLabel>
+          <Select
+            labelId="filter-status-label"
+            value={filterStatus}
+            label="Lọc theo trạng thái"
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <MenuItem value="ALL">Tất cả đơn</MenuItem>
+            <MenuItem value="PENDING">Đang chờ</MenuItem>
+            <MenuItem value="APPROVED">Đã duyệt</MenuItem>
+            <MenuItem value="CANCELLED">Đã hủy</MenuItem>
+            <MenuItem value="COMPLETED">Hoàn thành</MenuItem>
+          </Select>
 
 
-</FormControl>
+        </FormControl>
       </Box>
 
       {loadingOrders ? (
@@ -436,8 +455,8 @@ useEffect(() => {
                   <TableCell>
                     {
 
-                    <Link to={`/dashboard/purchase-orders/${order.id}`}>Xem chi tiết</Link>
-              
+                      <Link to={`/dashboard/purchase-orders/${order.id}`}>Xem chi tiết</Link>
+
                     }
                   </TableCell>
                 </TableRow>
