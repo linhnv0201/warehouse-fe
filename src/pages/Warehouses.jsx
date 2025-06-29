@@ -236,6 +236,7 @@ export default function Warehouses() {
                     <TableCell align="right"><strong>Tổng SL</strong></TableCell>
                     <TableCell align="right"><strong>Còn hàng</strong></TableCell>
                     <TableCell align="right"><strong>Đã đặt</strong></TableCell>
+                    <TableCell align="right"><strong>Đã bán</strong></TableCell>
                     <TableCell><strong>Đơn vị</strong></TableCell>
                     <TableCell align="right"><strong>Giá nhập</strong></TableCell>
                     <TableCell align="right"><strong>Thuế</strong></TableCell>
@@ -251,6 +252,7 @@ export default function Warehouses() {
                       <TableCell align="right">{item.quantity}</TableCell>
                       <TableCell align="right">{item.quantityAvailable}</TableCell>
                       <TableCell align="right">{item.quantityReserved}</TableCell>
+                      <TableCell align="right">{item.sold}</TableCell>
                       <TableCell>{item.unit}</TableCell>
                       <TableCell align="right">{item.unitPrice.toLocaleString()} ₫</TableCell>
                       <TableCell align="right">{item.taxRate}%</TableCell>
