@@ -644,8 +644,11 @@ export default function PurchaseOrderDetail() {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>Tạo phiếu nhập kho</DialogTitle>
-        <DialogContent dividers>
+        <DialogTitle sx={{ backgroundColor: '#6B4C3B', color: '#fff' }}>
+          Tạo phiếu nhập kho
+        </DialogTitle>
+
+        <DialogContent dividers sx={{ backgroundColor: '#E6D4C3' }}>
           {orderDetails && (
             <Box mb={2}>
               <Typography variant="subtitle1"><strong>Mã đơn hàng:</strong> {orderDetails.code}</Typography>
@@ -659,7 +662,7 @@ export default function PurchaseOrderDetail() {
             label="Chi phí vận chuyển"
             type="number"
             value={shippingCost}
-            onChange={e => setShippingCost(parseFloat(e.target.value) )}
+            onChange={e => setShippingCost(parseFloat(e.target.value))}
             fullWidth
             margin="normal"
           />
@@ -692,13 +695,9 @@ export default function PurchaseOrderDetail() {
                 <TextField
                   label="Số lượng nhập"
                   type="number"
-                  value={
-                    receiveQuantities.find(q => q.id === item.id)?.quantity ?? ''
-                  }
+                  value={receiveQuantities.find(q => q.id === item.id)?.quantity ?? ''}
                   onChange={e => {
                     const inputValue = e.target.value;
-
-                    // Chỉ cho nhập số nguyên >= 0 hoặc để rỗng (cho phép xoá)
                     if (
                       inputValue === '' ||
                       (/^\d+$/.test(inputValue) && Number(inputValue) <= item.remainingQuantity)
@@ -707,12 +706,10 @@ export default function PurchaseOrderDetail() {
                       let updatedQuantities;
 
                       if (existing) {
-                        // Cập nhật quantity nếu item đã có
                         updatedQuantities = receiveQuantities.map(q =>
                           q.id === item.id ? { ...q, quantity: inputValue } : q
                         );
                       } else {
-                        // Thêm mới nếu chưa có trong danh sách
                         updatedQuantities = [...receiveQuantities, { id: item.id, quantity: inputValue }];
                       }
 
@@ -723,20 +720,19 @@ export default function PurchaseOrderDetail() {
                   sx={{ width: 120 }}
                   variant="outlined"
                 />
-
               </Box>
             );
           })}
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={() => setOpenCreateReceiveOrderDialog(false)} color="secondary">
+        <DialogActions sx={{ backgroundColor: '#F3E6DC', padding: 2 }}>
+          <Button onClick={() => setOpenCreateReceiveOrderDialog(false)} sx={{ color: '#6B4C3B' }}>
             Hủy
           </Button>
           <Button
             variant="contained"
-            color="primary"
             onClick={() => handleCreateReceiveOrder(orderDetails.id)}
+            sx={{ backgroundColor: '#6B4C3B', color: '#fff' }}
           >
             Tạo phiếu nhập
           </Button>

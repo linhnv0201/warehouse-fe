@@ -602,10 +602,12 @@ export default function SaleOrderDetail() {
 
       )}
 
-      {/* Dialog tạo phiếu xuất */}
-      <Dialog open={openCreateDeliveryOrderDialog} onClose={() => setOpenCreateDeliveryOrderDialog(false)} fullWidth maxWidth="md">
-        <DialogTitle>Tạo phiếu xuất kho</DialogTitle>
-        <DialogContent dividers>
+      {/* Dialog tạo phiếu xuất */}<Dialog open={openCreateDeliveryOrderDialog} onClose={() => setOpenCreateDeliveryOrderDialog(false)} fullWidth maxWidth="md">
+        <DialogTitle sx={{ backgroundColor: '#6B4C3B', color: '#fff' }}>
+          Tạo phiếu xuất kho
+        </DialogTitle>
+
+        <DialogContent dividers sx={{ backgroundColor: '#E6D4C3' }}>
           {orderDetails && (
             <Box mb={2}>
               <Typography><strong>Mã đơn:</strong> {orderDetails.code}</Typography>
@@ -613,11 +615,26 @@ export default function SaleOrderDetail() {
               <Typography><strong>Kho:</strong> {orderDetails.warehouseName}</Typography>
             </Box>
           )}
+
           {orderDetails?.items?.map(it => (
-            <Box key={it.id} sx={{ my: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box
+              key={it.id}
+              sx={{
+                my: 1,
+                p: 2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                // bgcolor: '#f5f5f5',
+                borderRadius: 2,
+                border: '1px solid #ccc'
+              }}
+            >
               <Box>
-                <Typography><strong>{it.productName}</strong> (còn {it.remainingQuantity})</Typography>
+                <Typography fontWeight="bold">{it.productName}</Typography>
+                <Typography sx={{ mt: 0.5 }}>Còn lại: {it.remainingQuantity}</Typography>
               </Box>
+
               <TextField
                 label="Số lượng xuất"
                 type="number"
@@ -638,15 +655,17 @@ export default function SaleOrderDetail() {
             </Box>
           ))}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenCreateDeliveryOrderDialog(false)} color="secondary">
+
+        <DialogActions sx={{ backgroundColor: '#F3E6DC', padding: 2 }}>
+          <Button onClick={() => setOpenCreateDeliveryOrderDialog(false)} sx={{ color: '#6B4C3B' }}>
             Hủy
           </Button>
-          <Button variant="contained" onClick={() => handleCreateDeliveryOrder(orderDetails.id)}>
+          <Button variant="contained" onClick={() => handleCreateDeliveryOrder(orderDetails.id)} sx={{ backgroundColor: '#6B4C3B', color: '#fff' }}>
             Tạo phiếu xuất
           </Button>
         </DialogActions>
       </Dialog>
+
 
       {/* Dialog chi tiết phiếu xuất */}
       <Dialog open={openDetailDODialog} onClose={handleCloseDetailDO} fullWidth maxWidth="md">
