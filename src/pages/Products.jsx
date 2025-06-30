@@ -382,7 +382,11 @@ export default function Products() {
                   <TableCell>{p.unit}</TableCell>
                   <TableCell>{p.unitPrice?.toLocaleString("vi-VN")} VND</TableCell>
                   <TableCell>{p.taxRate !== null ? p.taxRate + "%" : ""}</TableCell>
-                  <TableCell>{p.supplierName}</TableCell>
+                  {/* <TableCell>{p.supplierName}</TableCell> */}
+                  <TableCell>
+                    {p.supplierName || p.supplier?.name || "Không rõ"}
+                  </TableCell>
+
                   <TableCell align="center">
                     <IconButton color="5D4037" onClick={() => handleOpenEdit(p)}>
                       <EditIcon />

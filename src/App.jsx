@@ -11,6 +11,7 @@ import PurchaseOrderDetail from './pages/PurchaseOrderDetail';
 import SaleOrders from "./pages/SaleOrders";
 import SaleOrderDetail from "./pages/SaleOrderDetail";
 import Statistics from "./pages/Statistics";
+// import UserProfile from "./pages/UserProfile"; 
 
 
 function RequireAuth({ children }) {
@@ -65,8 +66,7 @@ export default function App() {
         <Route path="sale-orders" element={<SaleOrders />} />
         <Route path="sale-orders/:orderId" element={<SaleOrderDetail />} />
         <Route path="statistics" element={<Statistics />} />
-
-
+        {/* <Route path="dashboard/profile" element={<UserProfile />} /> */}
 
       </Route>
 

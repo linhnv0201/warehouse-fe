@@ -39,7 +39,7 @@ export default function UserProfile() {
   if (loading) {
     return (
       <Box sx={{ mt: 5, textAlign: "center" }}>
-        <CircularProgress />
+        <CircularProgress sx={{ color: "#A67C52" }} />
       </Box>
     );
   }
@@ -53,20 +53,22 @@ export default function UserProfile() {
   }
 
   return (
-    <Paper sx={{ p: 4, maxWidth: 900, mx: "auto", mt: 4 }}>
-      <Typography variant="h5" gutterBottom>
-        User profile
+    <Paper sx={{ p: 4, maxWidth: 900, mx: "auto", mt: 4, backgroundColor: "#F3E6DC" }}>
+      <Typography variant="h5" gutterBottom sx={{ color: "#6B4C3B" }}>
+        Thông tin người dùng
       </Typography>
-      <Divider sx={{ mb: 3 }} />
+      <Divider sx={{ mb: 3, bgcolor: "#6B4C3B" }} />
 
       <Grid container spacing={4}>
-        <Grid item xs={12} md={4} sx={{ textAlign: "center" }}>
+        <Grid item xs={12} md={4} sx={{ textAlign: "center", backgroundColor: "#FDF6F0", borderRadius: 2, p: 2 }}>
           <Avatar
             src="/avatar.jpg"
             alt="User Avatar"
             sx={{ width: 120, height: 120, mx: "auto", mb: 2 }}
           />
-          <Typography variant="h6">{info.username || "John Smith"}</Typography>
+          <Typography variant="h6" sx={{ color: "#6B4C3B" }}>
+            {info.username || "John Smith"}
+          </Typography>
           <Typography color="text.secondary" sx={{ mb: 1 }}>
             {info.role || "Frontend Developer"}
           </Typography>
@@ -76,22 +78,31 @@ export default function UserProfile() {
 
         <Grid item xs={12} md={8}>
           <Box>
-            <Typography>Web Applications</Typography>
-            <LinearProgress variant="determinate" value={85} sx={{ mb: 1 }} />
-            <Typography>Website Design</Typography>
-            <LinearProgress variant="determinate" value={78} sx={{ mb: 1 }} />
-            <Typography>Automation & Testing</Typography>
-            <LinearProgress variant="determinate" value={47} sx={{ mb: 1 }} />
-            <Typography>UI / UX</Typography>
-            <LinearProgress variant="determinate" value={65} sx={{ mb: 1 }} />
+            <Typography sx={{ color: "#6B4C3B" }}>Web Applications</Typography>
+            <LinearProgress variant="determinate" value={85} sx={{ mb: 1, bgcolor: "#D7CCC8", "& .MuiLinearProgress-bar": { backgroundColor: "#A67C52" } }} />
+            <Typography sx={{ color: "#6B4C3B" }}>Website Design</Typography>
+            <LinearProgress variant="determinate" value={78} sx={{ mb: 1, bgcolor: "#D7CCC8", "& .MuiLinearProgress-bar": { backgroundColor: "#A67C52" } }} />
+            <Typography sx={{ color: "#6B4C3B" }}>Automation & Testing</Typography>
+            <LinearProgress variant="determinate" value={47} sx={{ mb: 1, bgcolor: "#D7CCC8", "& .MuiLinearProgress-bar": { backgroundColor: "#A67C52" } }} />
+            <Typography sx={{ color: "#6B4C3B" }}>UI / UX</Typography>
+            <LinearProgress variant="determinate" value={65} sx={{ mb: 1, bgcolor: "#D7CCC8", "& .MuiLinearProgress-bar": { backgroundColor: "#A67C52" } }} />
           </Box>
         </Grid>
       </Grid>
 
-      <Tabs value={tab} onChange={(e, v) => setTab(v)} sx={{ mt: 4 }}>
-        <Tab label="Recent Activity" />
-        <Tab label="Projects Worked on" />
-        <Tab label="Profile" />
+      <Tabs
+        value={tab}
+        onChange={(e, v) => setTab(v)}
+        sx={{
+          mt: 4,
+          "& .MuiTabs-indicator": { backgroundColor: "#6B4C3B" },
+          "& .MuiTab-root": { color: "#6B4C3B" },
+          "& .Mui-selected": { fontWeight: "bold", color: "#4E342E" }
+        }}
+      >
+        <Tab label="Hoạt động gần đây" />
+        <Tab label="Dự án đã tham gia" />
+        <Tab label="Hồ sơ" />
       </Tabs>
     </Paper>
   );

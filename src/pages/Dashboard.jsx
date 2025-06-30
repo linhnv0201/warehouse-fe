@@ -63,7 +63,7 @@ export default function Dashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Xóa token
+    localStorage.removeItem("token");
     handleMenuClose();
     navigate("/login");
   };
@@ -106,7 +106,11 @@ export default function Dashboard() {
               p: 2,
             }}
           >
-            <Typography variant="h6">Admin</Typography>
+            {/* <Typography variant="h6">Admin</Typography> */}
+            <Typography variant="h6">
+              {infoData?.role?.[0] || "Chưa có vai trò"}
+            </Typography>
+
             <IconButton onClick={toggleDrawer(true)} sx={{ color: "#E0D7C6" }}>
               <InfoIcon />
             </IconButton>
@@ -170,9 +174,9 @@ export default function Dashboard() {
                 open={Boolean(anchorEl)}
                 onClose={handleMenuClose}
               >
-                <MenuItem onClick={handleProfileClick}>My Profile</MenuItem>
-                <MenuItem onClick={handleMenuClose}>Settings</MenuItem>
-                <MenuItem onClick={handleMenuClose}>Help</MenuItem>
+                {/* <MenuItem onClick={handleProfileClick}>My Profile</MenuItem> */}
+                {/* <MenuItem onClick={handleMenuClose}>Settings</MenuItem>
+                <MenuItem onClick={handleMenuClose}>Help</MenuItem> */}
                 <Divider />
                 <MenuItem onClick={handleLogout}>
                   Log Out{" "}
