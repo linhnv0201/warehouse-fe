@@ -60,7 +60,7 @@ export default function PurchaseOrders() {
     setLoadingOrders(true);
     try {
       const res = await axios.get(
-        `https://warehouse-vkz2.onrender.com/warehouse/purchase-orders?status=${filterStatus}`,
+        `https://warehouse-production-53d6.up.railway.app/warehouse/purchase-orders?status=${filterStatus}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setOrders(res.data.result || []);
@@ -81,14 +81,14 @@ export default function PurchaseOrders() {
     if (view !== "create") return;
     // fetch warehouses
     axios
-      .get("https://warehouse-vkz2.onrender.com/warehouse/warehouses", {
+      .get("https://warehouse-production-53d6.up.railway.app/warehouse/warehouses", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setWarehouses(res.data.result || []))
       .catch((err) => console.error("Lỗi tải warehouses:", err));
     // fetch suppliers
     axios
-      .get("https://warehouse-vkz2.onrender.com/warehouse/suppliers", {
+      .get("https://warehouse-production-53d6.up.railway.app/warehouse/suppliers", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setSuppliers(res.data.result || []))
@@ -104,7 +104,7 @@ export default function PurchaseOrders() {
     }
     setLoadingProducts(true);
     axios
-      .get(`https://warehouse-vkz2.onrender.com/warehouse/products/supplier/${selectedSupplier}`, {
+      .get(`https://warehouse-production-53d6.up.railway.app/warehouse/products/supplier/${selectedSupplier}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -138,7 +138,7 @@ export default function PurchaseOrders() {
 
     setLoadingCreate(true);
     try {
-      await axios.post("https://warehouse-vkz2.onrender.com/warehouse/purchase-orders", payload, {
+      await axios.post("https://warehouse-production-53d6.up.railway.app/warehouse/purchase-orders", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Tạo đơn hàng thành công!");
@@ -175,7 +175,7 @@ export default function PurchaseOrders() {
     setLoadingOrderIds((prev) => [...prev, orderId]);
     try {
       await axios.patch(
-        `https://warehouse-vkz2.onrender.com/warehouse/purchase-orders/${orderId}/status?status=${status}`,
+        `https://warehouse-production-53d6.up.railway.app/warehouse/purchase-orders/${orderId}/status?status=${status}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

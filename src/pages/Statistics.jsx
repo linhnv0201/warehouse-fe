@@ -28,7 +28,7 @@ export default function Statistics() {
 
   const fetchData = async () => {
     setLoading(true);
-    const base = "https://warehouse-vkz2.onrender.com/warehouse/statistics/";
+    const base = "https://warehouse-production-53d6.up.railway.app/warehouse/statistics/";
     let type;
     if (tab === 0) type = "purchase-orders";
     else if (tab === 1) type = "sales-orders";
@@ -58,7 +58,7 @@ export default function Statistics() {
   const fetchBestSellers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("https://warehouse-vkz2.onrender.com/warehouse/inventories/best-sellers", {
+      const res = await axios.get("https://warehouse-production-53d6.up.railway.app/warehouse/inventories/best-sellers", {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = res.data?.result || [];

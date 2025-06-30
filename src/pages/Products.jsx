@@ -75,7 +75,7 @@ export default function Products() {
         return;
       }
       axios
-        .get(`https://warehouse-vkz2.onrender.com/warehouse/fuzzy-search?query=${encodeURIComponent(searchQuery)}`, {
+        .get(`https://warehouse-production-53d6.up.railway.app/warehouse/fuzzy-search?query=${encodeURIComponent(searchQuery)}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => setProducts(res.data))
@@ -90,7 +90,7 @@ export default function Products() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("https://warehouse-vkz2.onrender.com/warehouse/products", {
+      const res = await axios.get("https://warehouse-production-53d6.up.railway.app/warehouse/products", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(res.data.result);
@@ -103,7 +103,7 @@ export default function Products() {
   // Load danh sách nhà cung cấp
   const fetchSuppliers = async () => {
     try {
-      const res = await axios.get("https://warehouse-vkz2.onrender.com/warehouse/suppliers", {
+      const res = await axios.get("https://warehouse-production-53d6.up.railway.app/warehouse/suppliers", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSuppliers(res.data.result);
@@ -119,7 +119,7 @@ export default function Products() {
       return;
     }
     try {
-      const res = await axios.get(`https://warehouse-vkz2.onrender.com/warehouse/products/supplier/${supplierId}`, {
+      const res = await axios.get(`https://warehouse-production-53d6.up.railway.app/warehouse/products/supplier/${supplierId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(res.data.result);
@@ -179,7 +179,7 @@ export default function Products() {
         taxRate: form.taxRate ? parseFloat(form.taxRate) : null,
         supplierId: parseInt(form.supplierId),
       };
-      await axios.post("https://warehouse-vkz2.onrender.com/warehouse/products", payload, {
+      await axios.post("https://warehouse-production-53d6.up.railway.app/warehouse/products", payload, {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       });
       fetchProducts();
@@ -238,7 +238,7 @@ export default function Products() {
         taxRate: form.taxRate ? parseFloat(form.taxRate) : null,
         supplierId: parseInt(form.supplierId),
       };
-      await axios.put(`https://warehouse-vkz2.onrender.com/warehouse/products/${currentEdit.id}`, payload, {
+      await axios.put(`https://warehouse-production-53d6.up.railway.app/warehouse/products/${currentEdit.id}`, payload, {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       });
       fetchProducts();
@@ -265,7 +265,7 @@ export default function Products() {
 
   const handleDeleteProduct = async () => {
     try {
-      await axios.delete(`https://warehouse-vkz2.onrender.com/warehouse/products/${currentDelete.id}`, {
+      await axios.delete(`https://warehouse-production-53d6.up.railway.app/warehouse/products/${currentDelete.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchProducts();

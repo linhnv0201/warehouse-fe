@@ -67,7 +67,7 @@ export default function Employees() {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("https://warehouse-vkz2.onrender.com/warehouse/users", {
+      const res = await axios.get("https://warehouse-production-53d6.up.railway.app/warehouse/users", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEmployees(res.data.result);
@@ -121,7 +121,7 @@ export default function Employees() {
   const handleAddEmployee = async () => {
     try {
       const token = localStorage.getItem("token");
-      await axios.post("https://warehouse-vkz2.onrender.com/warehouse/users", form, {
+      await axios.post("https://warehouse-production-53d6.up.railway.app/warehouse/users", form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchEmployees();
@@ -165,7 +165,7 @@ export default function Employees() {
         updateData.password = form.password;
       }
 
-      await axios.put(`https://warehouse-vkz2.onrender.com/warehouse/users/${currentEdit.id}`, updateData, {
+      await axios.put(`https://warehouse-production-53d6.up.railway.app/warehouse/users/${currentEdit.id}`, updateData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -190,7 +190,7 @@ export default function Employees() {
   const handleDeleteEmployee = async () => {
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`https://warehouse-vkz2.onrender.com/warehouse/users/${currentDelete.id}`, {
+      await axios.delete(`https://warehouse-production-53d6.up.railway.app/warehouse/users/${currentDelete.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchEmployees();

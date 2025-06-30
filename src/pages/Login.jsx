@@ -20,7 +20,7 @@ export default function Login() {
     e.preventDefault();
     setErrorMsg('');
     try {
-      const res = await axios.post('https://warehouse-vkz2.onrender.com/warehouse/auth/token', {
+      const res = await axios.post('https://warehouse-production-53d6.up.railway.app/warehouse/auth/token', {
         email,
         password,
       });

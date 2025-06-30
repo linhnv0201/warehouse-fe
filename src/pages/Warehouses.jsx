@@ -59,7 +59,7 @@ export default function Warehouses() {
   const fetchWarehouses = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("https://warehouse-vkz2.onrender.com/warehouse/warehouses", {
+      const res = await axios.get("https://warehouse-production-53d6.up.railway.app/warehouse/warehouses", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setWarehouses(res.data.result);
@@ -75,7 +75,7 @@ export default function Warehouses() {
       const warehouse = warehouses.find(w => w.id === id);
       setInventoryWarehouseName(warehouse?.name || "");
 
-      const res = await axios.get(`https://warehouse-vkz2.onrender.com/warehouse/inventories/warehouse/${id}`, {
+      const res = await axios.get(`https://warehouse-production-53d6.up.railway.app/warehouse/inventories/warehouse/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const inv = res.data.result || [];
@@ -112,7 +112,7 @@ export default function Warehouses() {
 
   const handleAddWarehouse = async () => {
     try {
-      await axios.post("https://warehouse-vkz2.onrender.com/warehouse/warehouses", form, {
+      await axios.post("https://warehouse-production-53d6.up.railway.app/warehouse/warehouses", form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchWarehouses();
@@ -135,7 +135,7 @@ export default function Warehouses() {
   const handleEditWarehouse = async () => {
     try {
       await axios.put(
-        `https://warehouse-vkz2.onrender.com/warehouse/warehouses/${currentEdit.id}`,
+        `https://warehouse-production-53d6.up.railway.app/warehouse/warehouses/${currentEdit.id}`,
         form,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -157,7 +157,7 @@ export default function Warehouses() {
 
   const handleDeleteWarehouse = async () => {
     try {
-      await axios.delete(`https://warehouse-vkz2.onrender.com/warehouse/warehouses/${currentDelete.id}`, {
+      await axios.delete(`https://warehouse-production-53d6.up.railway.app/warehouse/warehouses/${currentDelete.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchWarehouses();

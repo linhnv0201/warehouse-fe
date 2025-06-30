@@ -57,7 +57,7 @@ export default function Customers() {
   const fetchCustomers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("https://warehouse-vkz2.onrender.com/warehouse/customers", {
+      const res = await axios.get("https://warehouse-production-53d6.up.railway.app/warehouse/customers", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCustomers(res.data.result);
@@ -75,7 +75,7 @@ export default function Customers() {
 
   const handleAddCustomer = async () => {
     try {
-      await axios.post("https://warehouse-vkz2.onrender.com/warehouse/customers", form, {
+      await axios.post("https://warehouse-production-53d6.up.railway.app/warehouse/customers", form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAlert({ open: true, type: "success", message: "Thêm khách hàng thành công" });
@@ -95,7 +95,7 @@ export default function Customers() {
 
   const handleEditCustomer = async () => {
     try {
-      await axios.put(`https://warehouse-vkz2.onrender.com/warehouse/customers/${currentEdit.id}`, form, {
+      await axios.put(`https://warehouse-production-53d6.up.railway.app/warehouse/customers/${currentEdit.id}`, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAlert({ open: true, type: "success", message: "Cập nhật khách hàng thành công" });
@@ -109,7 +109,7 @@ export default function Customers() {
 
   const handleDeleteCustomer = async () => {
     try {
-      await axios.delete(`https://warehouse-vkz2.onrender.com/warehouse/customers/${currentDelete.id}`, {
+      await axios.delete(`https://warehouse-production-53d6.up.railway.app/warehouse/customers/${currentDelete.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAlert({ open: true, type: "success", message: "Xóa khách hàng thành công" });

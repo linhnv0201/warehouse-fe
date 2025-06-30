@@ -50,7 +50,7 @@ export default function SaleOrders() {
   const fetchOrders = async () => {
     setLoadingOrders(true);
     try {
-      const url = `https://warehouse-vkz2.onrender.com/warehouse/sales-orders?status=${filterStatus}`;
+      const url = `https://warehouse-production-53d6.up.railway.app/warehouse/sales-orders?status=${filterStatus}`;
 
       const res = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
@@ -72,14 +72,14 @@ export default function SaleOrders() {
     if (view !== "create") return;
 
     axios
-      .get("https://warehouse-vkz2.onrender.com/warehouse/customers", {
+      .get("https://warehouse-production-53d6.up.railway.app/warehouse/customers", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setCustomers(res.data.result || []))
       .catch((err) => console.error("Lỗi tải customers:", err));
 
     axios
-      .get("https://warehouse-vkz2.onrender.com/warehouse/warehouses", {
+      .get("https://warehouse-production-53d6.up.railway.app/warehouse/warehouses", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setWarehouses(res.data.result || []))
@@ -96,7 +96,7 @@ export default function SaleOrders() {
 
     setLoadingProducts(true);
     axios
-      .get(`https://warehouse-vkz2.onrender.com/warehouse/inventories/warehouse/${selectedWarehouse}`, {
+      .get(`https://warehouse-production-53d6.up.railway.app/warehouse/inventories/warehouse/${selectedWarehouse}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -141,7 +141,7 @@ export default function SaleOrders() {
     setLoadingCreate(true);
     try {
       const res = await axios.post(
-        "https://warehouse-vkz2.onrender.com/warehouse/sales-orders",
+        "https://warehouse-production-53d6.up.railway.app/warehouse/sales-orders",
         payload,
         {
           headers: { Authorization: `Bearer ${token}` },

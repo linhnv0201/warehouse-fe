@@ -53,7 +53,7 @@ export default function Suppliers() {
   const fetchSuppliers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("https://warehouse-vkz2.onrender.com/warehouse/suppliers", {
+      const res = await axios.get("https://warehouse-production-53d6.up.railway.app/warehouse/suppliers", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSuppliers(res.data.result);
@@ -77,7 +77,7 @@ export default function Suppliers() {
 
   const handleAddSupplier = async () => {
     try {
-      await axios.post("https://warehouse-vkz2.onrender.com/warehouse/suppliers", form, {
+      await axios.post("https://warehouse-production-53d6.up.railway.app/warehouse/suppliers", form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchSuppliers();
@@ -104,7 +104,7 @@ export default function Suppliers() {
 
   const handleEditSupplier = async () => {
     try {
-      await axios.put(`https://warehouse-vkz2.onrender.com/warehouse/suppliers/${currentEdit.id}`, form, {
+      await axios.put(`https://warehouse-production-53d6.up.railway.app/warehouse/suppliers/${currentEdit.id}`, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchSuppliers();
@@ -125,7 +125,7 @@ export default function Suppliers() {
 
   const handleDeleteSupplier = async () => {
     try {
-      await axios.delete(`https://warehouse-vkz2.onrender.com/warehouse/suppliers/${currentDelete.id}`, {
+      await axios.delete(`https://warehouse-production-53d6.up.railway.app/warehouse/suppliers/${currentDelete.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchSuppliers();
