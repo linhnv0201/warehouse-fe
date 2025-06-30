@@ -59,7 +59,7 @@ export default function SaleOrderDetail() {
     const fetch = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8080/warehouse/sales-orders/${orderId}`,
+          `https://warehouse-vkz2.onrender.com/warehouse/sales-orders/${orderId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setOrder(res.data.result);
@@ -80,7 +80,7 @@ export default function SaleOrderDetail() {
     setLoadingDO(true);
     try {
       const res = await axios.get(
-        `http://localhost:8080/warehouse/delivery-orders/by-sales-order/${orderId}`,
+        `https://warehouse-vkz2.onrender.com/warehouse/delivery-orders/by-sales-order/${orderId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setDeliveryOrders(res.data.result || []);
@@ -95,7 +95,7 @@ export default function SaleOrderDetail() {
   const handleOpenCreateDeliveryOrder = async (salesOrderId) => {
     try {
       const res = await axios.get(
-        `http://localhost:8080/warehouse/sales-orders/${salesOrderId}`,
+        `https://warehouse-vkz2.onrender.com/warehouse/sales-orders/${salesOrderId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (res.data.code === 0) {
@@ -119,7 +119,7 @@ export default function SaleOrderDetail() {
 
   //   try {
   //     const res = await axios.post(
-  //       `http://localhost:8080/warehouse/delivery-orders/${salesOrderId}`,
+  //       `https://warehouse-vkz2.onrender.com/warehouse/delivery-orders/${salesOrderId}`,
   //       deliveryOrderData,
   //       { headers: { Authorization: `Bearer ${token}` } }
   //     );
@@ -154,7 +154,7 @@ export default function SaleOrderDetail() {
       };
 
       await axios.post(
-        `http://localhost:8080/warehouse/delivery-orders/${salesOrderId}`,
+        `https://warehouse-vkz2.onrender.com/warehouse/delivery-orders/${salesOrderId}`,
         deliveryOrderData,
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -180,7 +180,7 @@ export default function SaleOrderDetail() {
   //Chi tiết phiếu xuất
   const handleOpenDetailDO = async (deliveryOrderId) => {
     try {
-      const response = await axios.get(`http://localhost:8080/warehouse/delivery-orders/${deliveryOrderId}`, {
+      const response = await axios.get(`https://warehouse-vkz2.onrender.com/warehouse/delivery-orders/${deliveryOrderId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.data.code === 0) {
@@ -207,7 +207,7 @@ export default function SaleOrderDetail() {
     setLoadingSaleInvoice(true);
     try {
       const res = await axios.get(
-        `http://localhost:8080/warehouse/sale-invoices/by-delivery-order/${deliveryOrderId}`,
+        `https://warehouse-vkz2.onrender.com/warehouse/sale-invoices/by-delivery-order/${deliveryOrderId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -236,7 +236,7 @@ export default function SaleOrderDetail() {
     setCurrentDeliveryOrderId(deliveryOrderId);
     try {
       const res = await axios.get(
-        `http://localhost:8080/warehouse/sale-invoices/by-delivery-order/${deliveryOrderId}`,
+        `https://warehouse-vkz2.onrender.com/warehouse/sale-invoices/by-delivery-order/${deliveryOrderId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -289,7 +289,7 @@ export default function SaleOrderDetail() {
 
     try {
       const res = await axios.post(
-        `http://localhost:8080/warehouse/sale-invoice-payments/${selectedInvoice.id}`,
+        `https://warehouse-vkz2.onrender.com/warehouse/sale-invoice-payments/${selectedInvoice.id}`,
         {
           amount: paymentAmount,
           paymentMethod,
@@ -312,7 +312,7 @@ export default function SaleOrderDetail() {
         // 🔄 Gọi lại hóa đơn mới và mở lại dialog hóa đơn
         if (currentDeliveryOrderId) {
           const invoiceRes = await axios.get(
-            `http://localhost:8080/warehouse/sale-invoices/by-delivery-order/${currentDeliveryOrderId}`,
+            `https://warehouse-vkz2.onrender.com/warehouse/sale-invoices/by-delivery-order/${currentDeliveryOrderId}`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           if (invoiceRes.data.code === 0 && invoiceRes.data.result) {
@@ -341,7 +341,7 @@ export default function SaleOrderDetail() {
     setLoadingPayments(true);
     try {
       const res = await axios.get(
-        `http://localhost:8080/warehouse/sale-invoice-payments/${invoiceId}`,
+        `https://warehouse-vkz2.onrender.com/warehouse/sale-invoice-payments/${invoiceId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setPayments(res.data || []);
@@ -368,7 +368,7 @@ export default function SaleOrderDetail() {
   const handleOpenPaymentsDialogSO = async (deliveryOrderId) => {
     try {
       const res = await axios.get(
-        `http://localhost:8080/warehouse/sale-invoices/by-delivery-order/${deliveryOrderId}`,
+        `https://warehouse-vkz2.onrender.com/warehouse/sale-invoices/by-delivery-order/${deliveryOrderId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -393,7 +393,7 @@ export default function SaleOrderDetail() {
   const handleApprove = async () => {
     try {
       await axios.patch(
-        `http://localhost:8080/warehouse/sales-orders/${orderId}/status?status=APPROVED`,
+        `https://warehouse-vkz2.onrender.com/warehouse/sales-orders/${orderId}/status?status=APPROVED`,
         null,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -407,7 +407,7 @@ export default function SaleOrderDetail() {
   const handleCancel = async () => {
     try {
       await axios.patch(
-        `http://localhost:8080/warehouse/sales-orders/${orderId}/status?status=CANCELLED`,
+        `https://warehouse-vkz2.onrender.com/warehouse/sales-orders/${orderId}/status?status=CANCELLED`,
         null,
         { headers: { Authorization: `Bearer ${token}` } }
       );

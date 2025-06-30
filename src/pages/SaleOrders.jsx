@@ -50,7 +50,7 @@ export default function SaleOrders() {
   const fetchOrders = async () => {
     setLoadingOrders(true);
     try {
-      const url = `http://localhost:8080/warehouse/sales-orders?status=${filterStatus}`;
+      const url = `https://warehouse-vkz2.onrender.com/warehouse/sales-orders?status=${filterStatus}`;
 
       const res = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
@@ -72,14 +72,14 @@ export default function SaleOrders() {
     if (view !== "create") return;
 
     axios
-      .get("http://localhost:8080/warehouse/customers", {
+      .get("https://warehouse-vkz2.onrender.com/warehouse/customers", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setCustomers(res.data.result || []))
       .catch((err) => console.error("Lỗi tải customers:", err));
 
     axios
-      .get("http://localhost:8080/warehouse/warehouses", {
+      .get("https://warehouse-vkz2.onrender.com/warehouse/warehouses", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setWarehouses(res.data.result || []))
@@ -96,7 +96,7 @@ export default function SaleOrders() {
 
     setLoadingProducts(true);
     axios
-      .get(`http://localhost:8080/warehouse/inventories/warehouse/${selectedWarehouse}`, {
+      .get(`https://warehouse-vkz2.onrender.com/warehouse/inventories/warehouse/${selectedWarehouse}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -141,7 +141,7 @@ export default function SaleOrders() {
     setLoadingCreate(true);
     try {
       const res = await axios.post(
-        "http://localhost:8080/warehouse/sales-orders",
+        "https://warehouse-vkz2.onrender.com/warehouse/sales-orders",
         payload,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -223,7 +223,6 @@ export default function SaleOrders() {
       }
       return 0;
     };
-
 
     const totalAmount = items.reduce((sum, item) => sum + calculateLineTotal(item), 0);
 

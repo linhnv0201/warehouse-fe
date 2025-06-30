@@ -58,7 +58,7 @@ export default function PurchaseOrderDetail() {
   useEffect(() => {
     const fetchOrderDetail = async () => {
       try {
-        const res = await axios.get(`http://localhost:8080/warehouse/purchase-orders/${orderId}`, {
+        const res = await axios.get(`https://warehouse-vkz2.onrender.com/warehouse/purchase-orders/${orderId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setOrder(res.data.result);
@@ -75,7 +75,7 @@ export default function PurchaseOrderDetail() {
   // Hàm xử lý Duyệt đơn hàng
   const handleApproveOrder = async () => {
     try {
-      await axios.patch(`http://localhost:8080/warehouse/purchase-orders/${orderId}/status?status=APPROVED`, null, {
+      await axios.patch(`https://warehouse-vkz2.onrender.com/warehouse/purchase-orders/${orderId}/status?status=APPROVED`, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setOrder((prevOrder) => ({ ...prevOrder, status: 'APPROVED' }));
@@ -88,7 +88,7 @@ export default function PurchaseOrderDetail() {
   // Hàm xử lý Hủy đơn hàng
   const handleCancelOrder = async () => {
     try {
-      await axios.patch(`http://localhost:8080/warehouse/purchase-orders/${orderId}/status?status=CANCELLED`, null, {
+      await axios.patch(`https://warehouse-vkz2.onrender.com/warehouse/purchase-orders/${orderId}/status?status=CANCELLED`, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setOrder((prevOrder) => ({ ...prevOrder, status: 'CANCELLED' }));
@@ -103,7 +103,7 @@ export default function PurchaseOrderDetail() {
     setLoadingPI(true);
     try {
       const res = await axios.get(
-        `http://localhost:8080/warehouse/purchase-invoices/by-receive-order/${receiveOrderId}`,
+        `https://warehouse-vkz2.onrender.com/warehouse/purchase-invoices/by-receive-order/${receiveOrderId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -140,7 +140,7 @@ export default function PurchaseOrderDetail() {
   const fetchReceiveOrders = async () => {
     setLoadingRO(true);
     try {
-      const res = await axios.get(`http://localhost:8080/warehouse/receive-orders/by-purchase-order/${orderId}`, {
+      const res = await axios.get(`https://warehouse-vkz2.onrender.com/warehouse/receive-orders/by-purchase-order/${orderId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setReceiveOrders(res.data.result || []);
@@ -154,7 +154,7 @@ export default function PurchaseOrderDetail() {
   // Xử lý tạo phiếu nhập
   const handleOpenCreateReceiveOrder = async (purchaseOrderId) => {
     try {
-      const response = await axios.get(`http://localhost:8080/warehouse/purchase-orders/${purchaseOrderId}`, {
+      const response = await axios.get(`https://warehouse-vkz2.onrender.com/warehouse/purchase-orders/${purchaseOrderId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -190,7 +190,7 @@ export default function PurchaseOrderDetail() {
       };
 
       await axios.post(
-        `http://localhost:8080/warehouse/receive-orders/${purchaseOrderId}`,
+        `https://warehouse-vkz2.onrender.com/warehouse/receive-orders/${purchaseOrderId}`,
         receiveOrderData,
         {
           headers: {
@@ -218,7 +218,7 @@ export default function PurchaseOrderDetail() {
   //Chi tiết phiếu nhập
   const handleOpenDetail = async (receiveOrderId) => {
     try {
-      const response = await axios.get(`http://localhost:8080/warehouse/receive-orders/${receiveOrderId}`, {
+      const response = await axios.get(`https://warehouse-vkz2.onrender.com/warehouse/receive-orders/${receiveOrderId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.data.code === 0) {
@@ -263,7 +263,7 @@ export default function PurchaseOrderDetail() {
     };
 
     try {
-      const res = await fetch(`http://localhost:8080/warehouse/payments/${selectedInvoice.id}`, {
+      const res = await fetch(`https://warehouse-vkz2.onrender.com/warehouse/payments/${selectedInvoice.id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -301,7 +301,7 @@ export default function PurchaseOrderDetail() {
 
   const fetchPurchaseInvoiceByRO = async (receiveOrderId) => {
     try {
-      const res = await axios.get(`http://localhost:8080/warehouse/purchase-invoices/by-receive-order/${receiveOrderId}`, {
+      const res = await axios.get(`https://warehouse-vkz2.onrender.com/warehouse/purchase-invoices/by-receive-order/${receiveOrderId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.data.code === 0) {
@@ -316,7 +316,7 @@ export default function PurchaseOrderDetail() {
   const fetchPaymentsByInvoice = async (invoiceId) => {
     setLoadingPayments(true);
     try {
-      const res = await axios.get(`http://localhost:8080/warehouse/payments/by-invoice/${invoiceId}`, {
+      const res = await axios.get(`https://warehouse-vkz2.onrender.com/warehouse/payments/by-invoice/${invoiceId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.data.code === 0) {

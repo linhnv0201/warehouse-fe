@@ -60,7 +60,7 @@ export default function PurchaseOrders() {
     setLoadingOrders(true);
     try {
       const res = await axios.get(
-        `http://localhost:8080/warehouse/purchase-orders?status=${filterStatus}`,
+        `https://warehouse-vkz2.onrender.com/warehouse/purchase-orders?status=${filterStatus}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setOrders(res.data.result || []);
@@ -81,14 +81,14 @@ export default function PurchaseOrders() {
     if (view !== "create") return;
     // fetch warehouses
     axios
-      .get("http://localhost:8080/warehouse/warehouses", {
+      .get("https://warehouse-vkz2.onrender.com/warehouse/warehouses", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setWarehouses(res.data.result || []))
       .catch((err) => console.error("Lỗi tải warehouses:", err));
     // fetch suppliers
     axios
-      .get("http://localhost:8080/warehouse/suppliers", {
+      .get("https://warehouse-vkz2.onrender.com/warehouse/suppliers", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setSuppliers(res.data.result || []))
@@ -104,7 +104,7 @@ export default function PurchaseOrders() {
     }
     setLoadingProducts(true);
     axios
-      .get(`http://localhost:8080/warehouse/products/supplier/${selectedSupplier}`, {
+      .get(`https://warehouse-vkz2.onrender.com/warehouse/products/supplier/${selectedSupplier}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -138,7 +138,7 @@ export default function PurchaseOrders() {
 
     setLoadingCreate(true);
     try {
-      await axios.post("http://localhost:8080/warehouse/purchase-orders", payload, {
+      await axios.post("https://warehouse-vkz2.onrender.com/warehouse/purchase-orders", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Tạo đơn hàng thành công!");
@@ -175,7 +175,7 @@ export default function PurchaseOrders() {
     setLoadingOrderIds((prev) => [...prev, orderId]);
     try {
       await axios.patch(
-        `http://localhost:8080/warehouse/purchase-orders/${orderId}/status?status=${status}`,
+        `https://warehouse-vkz2.onrender.com/warehouse/purchase-orders/${orderId}/status?status=${status}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -188,180 +188,180 @@ export default function PurchaseOrders() {
   };
 
   // === RENDER ===
-if (view === "create") {
-  const calculateLineTotal = (item) => {
-    const product = products.find((p) => p.id === item.productId);
-    const qty = Number(item.quantity);
-    if (product && !isNaN(qty)) {
-      return product.unitPrice * qty * (1 + (product.taxRate || 0) / 100);
-    }
-    return 0;
-  };
+  if (view === "create") {
+    const calculateLineTotal = (item) => {
+      const product = products.find((p) => p.id === item.productId);
+      const qty = Number(item.quantity);
+      if (product && !isNaN(qty)) {
+        return product.unitPrice * qty * (1 + (product.taxRate || 0) / 100);
+      }
+      return 0;
+    };
 
-  const totalAmount = items.reduce((sum, item) => sum + calculateLineTotal(item), 0);
+    const totalAmount = items.reduce((sum, item) => sum + calculateLineTotal(item), 0);
 
-  return (
-    <Box sx={{ p: 3, bgcolor: "#F5F1E9", minHeight: "100vh", maxWidth: 700, mx: "auto" }}>
-      <Typography variant="h5" sx={{ mb: 3, color: "#6D5F4B" }}>
-        Tạo đơn hàng mua mới
-      </Typography>
+    return (
+      <Box sx={{ p: 3, bgcolor: "#F5F1E9", minHeight: "100vh", maxWidth: 700, mx: "auto" }}>
+        <Typography variant="h5" sx={{ mb: 3, color: "#6D5F4B" }}>
+          Tạo đơn hàng mua mới
+        </Typography>
 
-      <FormControl fullWidth sx={{ mb: 2 }}>
-        <TextField
-          label="Tên đơn hàng"
-          value={orderName}
-          onChange={(e) => setOrderName(e.target.value)}
-          disabled={loadingCreate}
-        />
-      </FormControl>
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <TextField
+            label="Tên đơn hàng"
+            value={orderName}
+            onChange={(e) => setOrderName(e.target.value)}
+            disabled={loadingCreate}
+          />
+        </FormControl>
 
-      <FormControl fullWidth sx={{ mb: 2 }}>
-        <InputLabel id="supplier-label">Nhà cung cấp</InputLabel>
-        <Select
-          labelId="supplier-label"
-          value={selectedSupplier}
-          label="Nhà cung cấp"
-          onChange={(e) => setSelectedSupplier(e.target.value)}
-          disabled={loadingCreate}
-        >
-          <MenuItem value=""><em>Chọn nhà cung cấp</em></MenuItem>
-          {suppliers.map((sup) => (
-            <MenuItem key={sup.id} value={sup.id}>{sup.name}</MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel id="supplier-label">Nhà cung cấp</InputLabel>
+          <Select
+            labelId="supplier-label"
+            value={selectedSupplier}
+            label="Nhà cung cấp"
+            onChange={(e) => setSelectedSupplier(e.target.value)}
+            disabled={loadingCreate}
+          >
+            <MenuItem value=""><em>Chọn nhà cung cấp</em></MenuItem>
+            {suppliers.map((sup) => (
+              <MenuItem key={sup.id} value={sup.id}>{sup.name}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
-      <FormControl fullWidth sx={{ mb: 2 }}>
-        <InputLabel id="warehouse-label">Kho hàng</InputLabel>
-        <Select
-          labelId="warehouse-label"
-          value={selectedWarehouse}
-          label="Kho hàng"
-          onChange={(e) => setSelectedWarehouse(e.target.value)}
-          disabled={loadingCreate}
-        >
-          <MenuItem value=""><em>Chọn kho hàng</em></MenuItem>
-          {warehouses.map((wh) => (
-            <MenuItem key={wh.id} value={wh.id}>{wh.name}</MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel id="warehouse-label">Kho hàng</InputLabel>
+          <Select
+            labelId="warehouse-label"
+            value={selectedWarehouse}
+            label="Kho hàng"
+            onChange={(e) => setSelectedWarehouse(e.target.value)}
+            disabled={loadingCreate}
+          >
+            <MenuItem value=""><em>Chọn kho hàng</em></MenuItem>
+            {warehouses.map((wh) => (
+              <MenuItem key={wh.id} value={wh.id}>{wh.name}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
-      <Typography variant="h6" sx={{ mt: 3, mb: 1, color: "#6D5F4B" }}>
-        Danh sách sản phẩm
-      </Typography>
+        <Typography variant="h6" sx={{ mt: 3, mb: 1, color: "#6D5F4B" }}>
+          Danh sách sản phẩm
+        </Typography>
 
-      {loadingProducts ? (
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-          <CircularProgress sx={{ color: "#6D5F4B" }} />
-        </Box>
-      ) : (
-        items.map((item, index) => {
-          const product = products.find(p => p.id === item.productId);
-          const qty = Number(item.quantity);
-          const total = calculateLineTotal(item);
+        {loadingProducts ? (
+          <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+            <CircularProgress sx={{ color: "#6D5F4B" }} />
+          </Box>
+        ) : (
+          items.map((item, index) => {
+            const product = products.find(p => p.id === item.productId);
+            const qty = Number(item.quantity);
+            const total = calculateLineTotal(item);
 
-          return (
-            <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }} key={index}>
-              <FormControl sx={{ flex: 1 }}>
-                <InputLabel id={`product-label-${index}`}>Sản phẩm</InputLabel>
-                <Select
-                  labelId={`product-label-${index}`}
-                  value={item.productId}
-                  label="Sản phẩm"
-                  onChange={(e) => handleItemChange(index, "productId", e.target.value)}
-                  disabled={loadingCreate}
-                >
-                  <MenuItem value=""><em>Chọn sản phẩm</em></MenuItem>
-                  {products.map((p) => {
-                    const isSelectedElsewhere = items.some((it, idx) => idx !== index && it.productId === p.id);
-                    return (
-                      <MenuItem
-                        key={p.id}
-                        value={p.id}
-                        disabled={isSelectedElsewhere}
-                        sx={isSelectedElsewhere ? { color: 'gray' } : {}}
-                      >
-                        {`${p.code} - ${p.name} - Giá mua ${p.unitPrice.toLocaleString()}₫`}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-              </FormControl>
+            return (
+              <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }} key={index}>
+                <FormControl sx={{ flex: 1 }}>
+                  <InputLabel id={`product-label-${index}`}>Sản phẩm</InputLabel>
+                  <Select
+                    labelId={`product-label-${index}`}
+                    value={item.productId}
+                    label="Sản phẩm"
+                    onChange={(e) => handleItemChange(index, "productId", e.target.value)}
+                    disabled={loadingCreate}
+                  >
+                    <MenuItem value=""><em>Chọn sản phẩm</em></MenuItem>
+                    {products.map((p) => {
+                      const isSelectedElsewhere = items.some((it, idx) => idx !== index && it.productId === p.id);
+                      return (
+                        <MenuItem
+                          key={p.id}
+                          value={p.id}
+                          disabled={isSelectedElsewhere}
+                          sx={isSelectedElsewhere ? { color: 'gray' } : {}}
+                        >
+                          {`${p.code} - ${p.name} - Giá mua ${p.unitPrice.toLocaleString()}₫`}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </FormControl>
 
-              <TextField
-                label="Số lượng"
-                type="text"
-                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-                value={item.quantity}
-                onChange={(e) => {
-                  const raw = e.target.value;
-                  if (raw === '') {
-                    handleItemChange(index, 'quantity', '');
-                  } else if (/^\d+$/.test(raw)) {
-                    const cleaned = raw.replace(/^0+/, '') || '0';
-                    if (parseInt(cleaned, 10) <= 9999999) {
-                      handleItemChange(index, 'quantity', cleaned);
+                <TextField
+                  label="Số lượng"
+                  type="text"
+                  inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+                  value={item.quantity}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    if (raw === '') {
+                      handleItemChange(index, 'quantity', '');
+                    } else if (/^\d+$/.test(raw)) {
+                      const cleaned = raw.replace(/^0+/, '') || '0';
+                      if (parseInt(cleaned, 10) <= 9999999) {
+                        handleItemChange(index, 'quantity', cleaned);
+                      }
                     }
-                  }
-                }}
-                sx={{ width: 100 }}
-                disabled={loadingCreate}
-              />
-
-              <Typography sx={{ color: '#5D4037', minWidth: 150, textAlign: 'right' }}>
-                Tổng: {product && !isNaN(qty) ? total.toLocaleString('vi-VN') + ' ₫' : '---'}
-              </Typography>
-
-              {items.length > 1 && (
-                <IconButton
-                  color="error"
-                  onClick={() => handleRemoveItem(index)}
+                  }}
+                  sx={{ width: 100 }}
                   disabled={loadingCreate}
-                  aria-label="Xóa sản phẩm"
-                >
-                  <RemoveCircleOutlineIcon />
-                </IconButton>
-              )}
-            </Stack>
-          );
-        })
-      )}
+                />
 
-      <Button
-        startIcon={<AddCircleOutlineIcon />}
-        onClick={handleAddItem}
-        disabled={loadingCreate || loadingProducts || !selectedSupplier}
-        sx={{ mb: 3 }}
-      >
-        Thêm sản phẩm
-      </Button>
+                <Typography sx={{ color: '#5D4037', minWidth: 150, textAlign: 'right' }}>
+                  Tổng: {product && !isNaN(qty) ? total.toLocaleString('vi-VN') + ' ₫' : '---'}
+                </Typography>
 
-      {/* Hiển thị tổng tiền ở đây */}
-      <Typography variant="h6" align="left" sx={{ color: '#5D4037', mb: 2 }}>
-        <strong>Tổng tiền (sau VAT):</strong> {totalAmount.toLocaleString('vi-VN')} ₫
-      </Typography>
+                {items.length > 1 && (
+                  <IconButton
+                    color="error"
+                    onClick={() => handleRemoveItem(index)}
+                    disabled={loadingCreate}
+                    aria-label="Xóa sản phẩm"
+                  >
+                    <RemoveCircleOutlineIcon />
+                  </IconButton>
+                )}
+              </Stack>
+            );
+          })
+        )}
 
-<Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2 }}>
-  <Button
-    variant="contained"
-    onClick={handleSubmit}
-    disabled={loadingCreate}
-    sx={{ bgcolor: "#6D5F4B" }}
-  >
-    {loadingCreate
-      ? <CircularProgress size={24} sx={{ color: "white" }} />
-      : "Tạo đơn hàng"}
-  </Button>
+        <Button
+          startIcon={<AddCircleOutlineIcon />}
+          onClick={handleAddItem}
+          disabled={loadingCreate || loadingProducts || !selectedSupplier}
+          sx={{ mb: 3 }}
+        >
+          Thêm sản phẩm
+        </Button>
 
-  <Button variant="outlined" onClick={() => setView("list")} disabled={loadingCreate}>
-    Hủy
-  </Button>
-</Box>
+        {/* Hiển thị tổng tiền ở đây */}
+        <Typography variant="h6" align="left" sx={{ color: '#5D4037', mb: 2 }}>
+          <strong>Tổng tiền (sau VAT):</strong> {totalAmount.toLocaleString('vi-VN')} ₫
+        </Typography>
 
-    </Box>
-  );
-}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 2 }}>
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            disabled={loadingCreate}
+            sx={{ bgcolor: "#6D5F4B" }}
+          >
+            {loadingCreate
+              ? <CircularProgress size={24} sx={{ color: "white" }} />
+              : "Tạo đơn hàng"}
+          </Button>
+
+          <Button variant="outlined" onClick={() => setView("list")} disabled={loadingCreate}>
+            Hủy
+          </Button>
+        </Box>
+
+      </Box>
+    );
+  }
 
 
   // === Màn danh sách đơn hàng (list) ===

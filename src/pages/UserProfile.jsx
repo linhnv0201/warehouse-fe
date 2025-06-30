@@ -22,7 +22,7 @@ export default function UserProfile() {
     const fetchInfo = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:8080/warehouse/users/myInfo", {
+        const res = await axios.get("https://warehouse-vkz2.onrender.com/warehouse/users/myInfo", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setInfo(res.data);

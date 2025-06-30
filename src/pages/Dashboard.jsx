@@ -72,7 +72,7 @@ export default function Dashboard() {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:8080/warehouse/users/myInfo", {
+      const res = await axios.get("https://warehouse-vkz2.onrender.com/warehouse/users/myInfo", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setInfoData(res.data.result);
