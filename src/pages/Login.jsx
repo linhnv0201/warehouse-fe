@@ -20,7 +20,7 @@ export default function Login() {
     e.preventDefault();
     setErrorMsg('');
     try {
-      const res = await axios.post('http://localhost:8080/warehouse/auth/token', {
+      const res = await axios.post('https://warehouse-vkz2.onrender.com/warehouse/auth/token', {
         email,
         password,
       });
