@@ -425,201 +425,6 @@ export default function SaleOrders() {
     );
   }
 
-  // === RENDER CREATE ===
-  // if (view === "create") {
-  //   return (
-  //     <Box sx={{ p: 3, bgcolor: "#F5F1E9", minHeight: "100vh", maxWidth: 800, mx: "auto" }}>
-  //       <Typography variant="h5" sx={{ mb: 3, color: "#6D5F4B" }}>
-  //         Tạo đơn hàng bán mới
-  //       </Typography>
-
-  //       <FormControl fullWidth sx={{ mb: 2 }}>
-  //         <TextField
-  //           label="Tên đơn hàng"
-  //           value={orderName}
-  //           onChange={(e) => setOrderName(e.target.value)}
-  //           disabled={loadingCreate}
-  //         />
-  //       </FormControl>
-
-  //       <FormControl fullWidth sx={{ mb: 2 }}>
-  //         <InputLabel id="customer-label" sx={{ color: "#6D5F4B" }}>Khách hàng</InputLabel>
-  //         <Select
-  //           labelId="customer-label"
-  //           value={selectedCustomer}
-  //           label="Khách hàng"
-  //           onChange={(e) => setSelectedCustomer(e.target.value)}
-  //           disabled={loadingCreate}
-  //           sx={{
-  //             '& .MuiOutlinedInput-notchedOutline': { borderColor: "#6D5F4B" },
-  //             '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: "#6D5F4B" },
-  //             '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: "#6D5F4B" },
-  //           }}
-  //         >
-  //           <MenuItem value=""><em>Chọn khách hàng</em></MenuItem>
-  //           {customers.map((customer) => (
-  //             <MenuItem key={customer.id} value={customer.id}>
-  //               {customer.name}
-  //             </MenuItem>
-  //           ))}
-  //         </Select>
-  //       </FormControl>
-
-  //       <FormControl fullWidth sx={{ mb: 2 }}>
-  //         <InputLabel id="warehouse-label" sx={{ color: "#6D5F4B" }}>Kho hàng</InputLabel>
-  //         <Select
-  //           labelId="warehouse-label"
-  //           value={selectedWarehouse}
-  //           label="Kho hàng"
-  //           onChange={(e) => setSelectedWarehouse(e.target.value)}
-  //           disabled={loadingCreate}
-  //           sx={{
-  //             '& .MuiOutlinedInput-notchedOutline': { borderColor: "#6D5F4B" },
-  //             '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: "#6D5F4B" },
-  //             '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: "#6D5F4B" },
-  //           }}
-  //         >
-  //           <MenuItem value=""><em>Chọn kho hàng</em></MenuItem>
-  //           {warehouses.map((wh) => (
-  //             <MenuItem key={wh.id} value={wh.id}>{wh.name}</MenuItem>
-  //           ))}
-  //         </Select>
-  //       </FormControl>
-
-  //       <Typography variant="h6" sx={{ mt: 3, mb: 1, color: "#6D5F4B" }}>
-  //         Danh sách sản phẩm
-  //       </Typography>
-
-  //       {loadingProducts ? (
-  //         <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-  //           <CircularProgress sx={{ color: "#6D5F4B" }} />
-  //         </Box>
-  //       ) : (
-  //         items.map((item, index) => (
-  //           <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }} key={index}>
-  //             <FormControl sx={{ flex: 2 }}>
-  //               <InputLabel id={`inventory-label-${index}`} sx={{ color: "#6D5F4B" }}>Sản phẩm</InputLabel>
-  //               <Select
-  //                 labelId={`inventory-label-${index}`}
-  //                 value={item.inventoryId}
-  //                 label="Sản phẩm"
-  //                 onChange={(e) => handleItemChange(index, "inventoryId", e.target.value)}
-  //                 disabled={loadingCreate}
-  //                 sx={{
-  //                   '& .MuiOutlinedInput-notchedOutline': { borderColor: "#6D5F4B" },
-  //                   '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: "#6D5F4B" },
-  //                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: "#6D5F4B" },
-  //                 }}
-  //               >
-  //                 <MenuItem value=""><em>Chọn sản phẩm</em></MenuItem>
-  //                 {products.map((p) => {
-  //                   const isSelectedElsewhere = items.some((it, idx) => idx !== index && it.inventoryId === p.id);
-  //                   const isDisabled = p.quantityAvailable <= 0 || isSelectedElsewhere;
-
-  //                   return (
-  //                     <MenuItem
-  //                       key={p.id}
-  //                       value={p.id}
-  //                       disabled={isDisabled}
-  //                       sx={isDisabled ? { color: "gray" } : {}}
-  //                     >
-  //                       {`${p.productCode} - ${p.productName} (Còn: ${p.quantityAvailable}) - Giá mua: ${p.unitPrice.toLocaleString()}đ`}
-  //                     </MenuItem>
-  //                   );
-  //                 })}
-
-  //               </Select>
-  //             </FormControl>
-
-  //             <TextField
-  //               label="Số lượng"
-  //               type="text"
-  //               inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-  //               value={item.quantity}
-  //               onChange={(e) => {
-  //                 const raw = e.target.value;
-
-  //                 if (raw === '') {
-  //                   handleItemChange(index, 'quantity', '');
-  //                 } else if (/^\d+$/.test(raw)) {
-  //                   const cleaned = raw.replace(/^0+/, '') || '0';
-  //                   if (parseInt(cleaned, 10) <= 9999999) {
-  //                     handleItemChange(index, 'quantity', cleaned);
-  //                   }
-  //                 }
-  //               }}
-  //               sx={{ width: 100 }}
-  //               disabled={loadingCreate}
-  //             />
-
-
-
-  //             <TextField
-  //               label="Đơn giá bán"
-  //               type="text"
-  //               inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-  //               value={item.saleUnitPrice}
-  //               onChange={(e) => {
-  //                 const raw = e.target.value;
-
-  //                 if (raw === '' || /^\d+$/.test(raw)) {
-  //                   const cleaned = raw.replace(/^0+/, '') || '0';
-  //                   if (cleaned === '' || parseInt(cleaned, 10) <= 999999999) {
-  //                     handleItemChange(index, 'saleUnitPrice', raw); // 👈 dùng raw
-  //                   }
-  //                 }
-  //               }}
-  //               sx={{ width: 140 }}
-  //               disabled={loadingCreate}
-  //             />
-
-
-
-  //             {items.length > 1 && (
-  //               <IconButton
-  //                 color="error"
-  //                 onClick={() => handleRemoveItem(index)}
-  //                 disabled={loadingCreate}
-  //               >
-  //                 <RemoveCircleOutlineIcon />
-  //               </IconButton>
-  //             )}
-  //           </Stack>
-  //         ))
-  //       )}
-
-  //       <Button
-  //         startIcon={<AddCircleOutlineIcon />}
-  //         onClick={handleAddItem}
-  //         disabled={loadingCreate || loadingProducts || !selectedWarehouse}
-  //         sx={{ mb: 3, color: "#6D5F4B" }}
-  //       >
-  //         Thêm sản phẩm
-  //       </Button>
-
-  //       <Box sx={{ mt: 3 }}>
-  //         <Button
-  //           variant="contained"
-  //           onClick={handleSubmit}
-  //           disabled={loadingCreate || loadingProducts}
-  //           sx={{ mr: 2, bgcolor: "#6D5F4B", '&:hover': { bgcolor: "#5a4d3a" } }}
-  //         >
-  //           {loadingCreate ? <CircularProgress size={24} sx={{ color: "#fff" }} /> : "Tạo đơn hàng"}
-  //         </Button>
-
-  //         <Button
-  //           variant="outlined"
-  //           onClick={() => setView("list")}
-  //           disabled={loadingCreate || loadingProducts}
-  //         >
-  //           Hủy
-  //         </Button>
-  //       </Box>
-
-  //     </Box>
-  //   );
-  // }
-
   // === RENDER LIST ===
   return (
     <Box sx={{ p: 3, bgcolor: "#F5F1E9", minHeight: "100vh" }}>
@@ -664,18 +469,67 @@ export default function SaleOrders() {
           <CircularProgress sx={{ color: "#6D5F4B" }} />
         </Box>
       ) : (
-        <TableContainer component={Paper}>
-          <Table>
+        // <TableContainer component={Paper}>
+        //   <Table>
+        //     <TableHead>
+        //       <TableRow sx={{ bgcolor: "#E9E4D4" }}>
+        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Mã đơn hàng</TableCell>
+        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Tên đơn hàng</TableCell>
+        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Khách hàng</TableCell>
+        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Trạng thái</TableCell>
+        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Ngày tạo</TableCell>
+        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Hành động</TableCell>
+        //       </TableRow>
+        //     </TableHead>
+        //     <TableBody>
+        //       {orders.map((order) => (
+        //         <TableRow key={order.id}>
+        //           <TableCell>{order.code}</TableCell>
+        //           <TableCell>{order.saleName}</TableCell>
+        //           <TableCell>{order.customerName}</TableCell>
+        //           <TableCell>{order.status}</TableCell>
+        //           <TableCell>
+        //             {new Date(order.createdAt).toLocaleDateString("vi-VN")}
+        //           </TableCell>
+        //           <TableCell>
+        //             <Link to={`/dashboard/sale-orders/${order.id}`} style={{ color: "#6D5F4B" }}>
+        //               Xem chi tiết
+        //             </Link>
+        //           </TableCell>
+        //         </TableRow>
+        //       ))}
+        //     </TableBody>
+        //   </Table>
+        // </TableContainer>
+        <TableContainer component={Paper} sx={{ maxHeight: 500, overflowY: "auto" }}>
+          <Table stickyHeader>
             <TableHead>
               <TableRow sx={{ bgcolor: "#E9E4D4" }}>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Mã đơn hàng</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Tên đơn hàng</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Khách hàng</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Trạng thái</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Ngày tạo</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Hành động</TableCell>
+                {[
+                  "Mã đơn hàng",
+                  "Tên đơn hàng",
+                  "Khách hàng",
+                  "Trạng thái",
+                  "Ngày tạo",
+                  "Hành động"
+                ].map((label, idx) => (
+                  <TableCell
+                    key={idx}
+                    sx={{
+                      color: "#6D5F4B",
+                      fontWeight: "bold",
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 1,
+                      bgcolor: "#E9E4D4"
+                    }}
+                  >
+                    {label}
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
+
             <TableBody>
               {orders.map((order) => (
                 <TableRow key={order.id}>
@@ -696,6 +550,8 @@ export default function SaleOrders() {
             </TableBody>
           </Table>
         </TableContainer>
+
+
       )}
     </Box>
   );

@@ -359,20 +359,99 @@ export default function Products() {
           <CircularProgress sx={{ color: "#6D5F4B" }} />
         </Box>
       ) : (
-        <TableContainer component={Paper} sx={{ boxShadow: "none", bgcolor: "#FFFFFF" }}>
-          <Table sx={{ minWidth: 650 }}>
+        // <TableContainer component={Paper} sx={{ boxShadow: "none", bgcolor: "#FFFFFF" }}>
+        // <TableContainer
+        //   component={Paper}
+        //   sx={{
+        //     boxShadow: "none",
+        //     bgcolor: "#FFFFFF",
+        //     maxHeight: "500px",           // 👈 Giới hạn chiều cao
+        //     overflowY: "auto",            // 👈 Bật cuộn dọc
+        //   }}
+        // >
+        //   <Table sx={{ minWidth: 650 }}>
+        //     <TableHead>
+        //       <TableRow sx={{ bgcolor: "#E9E4D4" }}>
+        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Mã SP</TableCell>
+        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Tên SP</TableCell>
+        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Mô tả</TableCell>
+        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Đơn vị</TableCell>
+        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Giá</TableCell>
+        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Thuế (%)</TableCell>
+        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Nhà cung cấp</TableCell>
+        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold", textAlign: "center" }}>Thao tác</TableCell>
+        //       </TableRow>
+        //     </TableHead>
+        //     <TableBody>
+        //       {products.map((p) => (
+        //         <TableRow key={p.id}>
+        //           <TableCell>{p.code}</TableCell>
+        //           <TableCell>{p.name}</TableCell>
+        //           <TableCell>{p.description}</TableCell>
+        //           <TableCell>{p.unit}</TableCell>
+        //           <TableCell>{p.unitPrice?.toLocaleString("vi-VN")} VND</TableCell>
+        //           <TableCell>{p.taxRate !== null ? p.taxRate + "%" : ""}</TableCell>
+        //           <TableCell>{p.supplierName}</TableCell>
+        //           <TableCell align="center">
+        //             <IconButton color="5D4037" onClick={() => handleOpenEdit(p)}>
+        //               <EditIcon />
+        //             </IconButton>
+        //             <IconButton color="5D4037" onClick={() => handleOpenDelete(p)}>
+        //               <DeleteIcon />
+        //             </IconButton>
+        //           </TableCell>
+        //         </TableRow>
+        //       ))}
+        //       {products.length === 0 && (
+        //         <TableRow>
+        //           <TableCell colSpan={8} align="center">
+        //             Không có sản phẩm nào
+        //           </TableCell>
+        //         </TableRow>
+        //       )}
+        //     </TableBody>
+        //   </Table>
+        // </TableContainer>
+        <TableContainer
+          component={Paper}
+          sx={{
+            boxShadow: "none",
+            bgcolor: "#FFFFFF",
+            maxHeight: "550px",     // Giới hạn chiều cao bảng
+            overflowY: "auto",      // Cho phép cuộn dọc
+          }}
+        >
+          <Table stickyHeader sx={{ minWidth: 650 }}>
             <TableHead>
               <TableRow sx={{ bgcolor: "#E9E4D4" }}>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Mã SP</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Tên SP</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Mô tả</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Đơn vị</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Giá</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Thuế (%)</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Nhà cung cấp</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold", textAlign: "center" }}>Thao tác</TableCell>
+                {[
+                  "Mã SP",
+                  "Tên SP",
+                  "Mô tả",
+                  "Đơn vị",
+                  "Giá",
+                  "Thuế (%)",
+                  "Nhà cung cấp",
+                  "Thao tác",
+                ].map((label, index) => (
+                  <TableCell
+                    key={index}
+                    sx={{
+                      color: "#6D5F4B",
+                      fontWeight: "bold",
+                      position: "sticky",
+                      top: 0,
+                      bgcolor: "#E9E4D4",
+                      zIndex: 1,
+                      textAlign: label === "Thao tác" ? "center" : "left",
+                    }}
+                  >
+                    {label}
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
+
             <TableBody>
               {products.map((p) => (
                 <TableRow key={p.id}>
@@ -403,6 +482,7 @@ export default function Products() {
             </TableBody>
           </Table>
         </TableContainer>
+
       )}
 
       {/* Modal Thêm sản phẩm */}
