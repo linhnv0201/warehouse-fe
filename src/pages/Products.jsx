@@ -282,6 +282,7 @@ export default function Products() {
       </Typography>
 
       <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 2 }}>
+        
         <Button
           variant="contained"
           onClick={() => {
@@ -359,20 +360,46 @@ export default function Products() {
           <CircularProgress sx={{ color: "#6D5F4B" }} />
         </Box>
       ) : (
-        <TableContainer component={Paper} sx={{ boxShadow: "none", bgcolor: "#FFFFFF" }}>
-          <Table sx={{ minWidth: 650 }}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            boxShadow: "none",
+            bgcolor: "#FFFFFF",
+            maxHeight: "550px",     // Giới hạn chiều cao bảng
+            overflowY: "auto",      // Cho phép cuộn dọc
+          }}
+        >
+          <Table stickyHeader sx={{ minWidth: 650 }}>
             <TableHead>
               <TableRow sx={{ bgcolor: "#E9E4D4" }}>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Mã SP</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Tên SP</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Mô tả</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Đơn vị</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Giá</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Thuế (%)</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Nhà cung cấp</TableCell>
-                <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold", textAlign: "center" }}>Thao tác</TableCell>
+                {[
+                  "Mã SP",
+                  "Tên SP",
+                  "Mô tả",
+                  "Đơn vị",
+                  "Giá",
+                  "Thuế (%)",
+                  "Nhà cung cấp",
+                  "Thao tác",
+                ].map((label, index) => (
+                  <TableCell
+                    key={index}
+                    sx={{
+                      color: "#6D5F4B",
+                      fontWeight: "bold",
+                      position: "sticky",
+                      top: 0,
+                      bgcolor: "#E9E4D4",
+                      zIndex: 1,
+                      textAlign: label === "Thao tác" ? "center" : "left",
+                    }}
+                  >
+                    {label}
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
+
             <TableBody>
               {products.map((p) => (
                 <TableRow key={p.id}>
@@ -382,11 +409,7 @@ export default function Products() {
                   <TableCell>{p.unit}</TableCell>
                   <TableCell>{p.unitPrice?.toLocaleString("vi-VN")} VND</TableCell>
                   <TableCell>{p.taxRate !== null ? p.taxRate + "%" : ""}</TableCell>
-                  {/* <TableCell>{p.supplierName}</TableCell> */}
-                  <TableCell>
-                    {p.supplierName || p.supplier?.name || "Không rõ"}
-                  </TableCell>
-
+                  <TableCell>{p.supplierName}</TableCell>
                   <TableCell align="center">
                     <IconButton color="5D4037" onClick={() => handleOpenEdit(p)}>
                       <EditIcon />
@@ -407,6 +430,7 @@ export default function Products() {
             </TableBody>
           </Table>
         </TableContainer>
+
       )}
 
       {/* Modal Thêm sản phẩm */}
