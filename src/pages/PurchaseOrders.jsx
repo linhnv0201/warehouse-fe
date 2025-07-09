@@ -18,6 +18,10 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import axios from "axios";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -54,7 +58,20 @@ export default function PurchaseOrders() {
 
   const [loadingCreate, setLoadingCreate] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
+  
+  const [showCreateProductDialog, setShowCreateProductDialog] = useState(false);
+const [newProduct, setNewProduct] = useState({
+  code: "",
+  name: "",
+  unit: "",
+  unitPrice: "",
+  taxRate: ""
+});
 
+
+
+
+  
   // Fetch đơn hàng (list)
   const fetchOrders = async () => {
     setLoadingOrders(true);
@@ -247,9 +264,33 @@ export default function PurchaseOrders() {
           </Select>
         </FormControl>
 
-        <Typography variant="h6" sx={{ mt: 3, mb: 1, color: "#6D5F4B" }}>
+        {/* <Typography variant="h6" sx={{ mt: 3, mb: 1, color: "#6D5F4B" }}>
           Danh sách sản phẩm
-        </Typography>
+        </Typography> */}
+<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+  <Typography variant="h6" sx={{ color: "#6D5F4B" }}>
+    Danh sách sản phẩm
+  </Typography>
+  <Button
+    variant="outlined"
+    size="small"
+    onClick={() => setShowCreateProductDialog(true)}
+    disabled={!selectedSupplier}
+    sx={{
+      borderColor: "#6D5F4B",
+      color: "#6D5F4B",
+      "&:hover": {
+        borderColor: "#5D4037",
+        color: "#5D4037",
+      },
+    }}
+  >
+    + Tạo sản phẩm mới
+  </Button>
+</Box>
+
+
+        
 
         {loadingProducts ? (
           <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
@@ -368,6 +409,94 @@ export default function PurchaseOrders() {
           </Button>
         </Box>
 
+        <Dialog
+  open={showCreateProductDialog}
+  onClose={() => setShowCreateProductDialog(false)}
+  fullWidth
+  maxWidth="sm"
+>
+  <DialogTitle>Tạo sản phẩm mới</DialogTitle>
+  <DialogContent dividers>
+    <Stack spacing={2}>
+      <TextField
+        label="Mã sản phẩm"
+        value={newProduct.code}
+        onChange={(e) => setNewProduct({ ...newProduct, code: e.target.value })}
+        fullWidth
+      />
+      <TextField
+        label="Tên sản phẩm"
+        value={newProduct.name}
+        onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+        fullWidth
+      />
+      <TextField
+        label="Đơn vị tính"
+        value={newProduct.unit}
+        onChange={(e) => setNewProduct({ ...newProduct, unit: e.target.value })}
+        fullWidth
+      />
+      <TextField
+        label="Giá mua"
+        type="number"
+        value={newProduct.unitPrice}
+        onChange={(e) => setNewProduct({ ...newProduct, unitPrice: e.target.value })}
+        fullWidth
+      />
+      <TextField
+        label="Thuế (%)"
+        type="number"
+        value={newProduct.taxRate}
+        onChange={(e) => setNewProduct({ ...newProduct, taxRate: e.target.value })}
+        fullWidth
+      />
+    </Stack>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setShowCreateProductDialog(false)}>Hủy</Button>
+    <Button
+      onClick={async () => {
+        try {
+          const payload = {
+            ...newProduct,
+            supplierId: Number(selectedSupplier),
+            unitPrice: Number(newProduct.unitPrice),
+            taxRate: Number(newProduct.taxRate),
+          };
+          const res = await axios.post(
+            "http://localhost:8080/warehouse/products",
+            payload,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          alert("Tạo sản phẩm thành công!");
+          setShowCreateProductDialog(false);
+          setNewProduct({
+            code: "",
+            name: "",
+            unit: "",
+            unitPrice: "",
+            taxRate: "",
+          });
+          // Reload lại danh sách sản phẩm:
+          const productRes = await axios.get(
+            `http://localhost:8080/warehouse/products/supplier/${selectedSupplier}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setProducts(productRes.data.result || []);
+        } catch (err) {
+          console.error("Lỗi tạo sản phẩm:", err);
+          alert("Tạo sản phẩm thất bại");
+        }
+      }}
+      variant="contained"
+      sx={{ bgcolor: "#6D5F4B" }}
+    >
+      Lưu
+    </Button>
+  </DialogActions>
+</Dialog>
+
+
       </Box>
     );
   }
@@ -430,49 +559,6 @@ export default function PurchaseOrders() {
           <CircularProgress sx={{ color: "#6D5F4B" }} />
         </Box>
       ) : (
-        // <TableContainer component={Paper}>
-        //   <Table sx={{ minWidth: 650 }} aria-label="Danh sách đơn hàng">
-        //     <TableHead sx={{ bgcolor: "#E9E4D4" }}>
-        //       <TableRow>
-        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Mã đơn</TableCell>
-        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Tên đơn</TableCell>
-        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Nhà cung cấp</TableCell>
-        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Kho hàng</TableCell>
-        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Trạng thái</TableCell>
-        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Ngày tạo</TableCell>
-        //         <TableCell sx={{ color: "#6D5F4B", fontWeight: "bold" }}>Hành động</TableCell>
-        //       </TableRow>
-        //     </TableHead>
-        //     <TableBody>
-        //       {orders.length === 0 && (
-        //         <TableRow>
-        //           <TableCell colSpan={7} align="center">
-        //             Không có đơn hàng nào
-        //           </TableCell>
-        //         </TableRow>
-        //       )}
-        //       {orders.map((order) => (
-        //         <TableRow key={order.id}>
-        //           <TableCell>{order.code || order.id}</TableCell>
-        //           <TableCell>{order.orderName}</TableCell>
-        //           <TableCell>{order.supplierName}</TableCell>
-        //           <TableCell>{order.warehouseName}</TableCell>
-        //           <TableCell>{order.status}</TableCell>
-        //           <TableCell>
-        //             {new Date(order.createdAt).toLocaleDateString("vi-VN")}
-        //           </TableCell>
-        //           <TableCell>
-        //             {
-
-        //               <Link to={`/dashboard/purchase-orders/${order.id}`}>Xem chi tiết</Link>
-
-        //             }
-        //           </TableCell>
-        //         </TableRow>
-        //       ))}
-        //     </TableBody>
-        //   </Table>
-        // </TableContainer>
         <TableContainer component={Paper} sx={{ maxHeight: 500, overflowY: "auto" }}>
           <Table stickyHeader sx={{ minWidth: 650 }} aria-label="Danh sách đơn hàng">
             <TableHead>
